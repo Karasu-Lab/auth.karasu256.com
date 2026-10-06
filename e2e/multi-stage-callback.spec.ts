@@ -1,4 +1,4 @@
-import { test, expect, type CDPSession, type Page } from '@playwright/test';
+import { test, expect, type APIRequestContext, type CDPSession, type Page } from '@playwright/test';
 import { ACCOUNTS_URL, AUTH_URL, MOCK_OAUTH_URL } from '../playwright.config';
 import {
   configureMockOAuth,
@@ -111,7 +111,7 @@ test.describe('OAuth authorize flow', () => {
 
   async function finishAtClient(
     page: Page,
-    request: Parameters<typeof signUp>[0],
+    playwright: { request: { newContext: () => Promise<APIRequestContext> } },
     client: { client_id: string; client_secret: string },
     clientState: string,
     verifier: string
@@ -125,7 +125,8 @@ test.describe('OAuth authorize flow', () => {
     const code = returned.searchParams.get('code');
     expect(code).toBeTruthy();
 
-    const tokenRes = await request.post(`${AUTH_URL}/api/auth/oauth2/token`, {
+    const clientServer = await playwright.request.newContext();
+    const tokenRes = await clientServer.post(`${AUTH_URL}/api/auth/oauth2/token`, {
       form: {
         grant_type: 'authorization_code',
         code: code!,
@@ -135,7 +136,7 @@ test.describe('OAuth authorize flow', () => {
         code_verifier: verifier,
       },
     });
-    expect(tokenRes.ok()).toBeTruthy();
+    expect(tokenRes.ok(), await tokenRes.text()).toBeTruthy();
     expect(((await tokenRes.json()) as { access_token?: string }).access_token).toBeTruthy();
   }
 
@@ -149,10 +150,10 @@ test.describe('OAuth authorize flow', () => {
     await page.waitForURL(/\/sign-in\?.*sig=/);
     await fillEmailPassword(page, user);
 
-    await finishAtClient(page, request, client, clientState, verifier);
+    await finishAtClient(page, playwright, client, clientState, verifier);
   });
 
-  test('google sign-in inside the authorize flow returns the client state', async ({ page, request }) => {
+  test('google sign-in inside the authorize flow returns the client state', async ({ page, request, playwright }) => {
     const client = await createClient(request);
     await configureMockOAuth(request, 'redirect', uniqueEmail('oauth-google'));
     const states = recordProviderStates(page, 'google');
@@ -163,7 +164,7 @@ test.describe('OAuth authorize flow', () => {
     await page.waitForURL(/\/sign-in\?.*sig=/);
     await page.getByRole('button', { name: 'Google' }).click();
 
-    await finishAtClient(page, request, client, clientState, verifier);
+    await finishAtClient(page, playwright, client, clientState, verifier);
     expect(states.received).toBe(states.sent);
   });
 });

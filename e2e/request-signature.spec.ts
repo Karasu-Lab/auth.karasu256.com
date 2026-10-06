@@ -28,9 +28,10 @@ function send(request: APIRequestContext, signed: SignedAuthRequest) {
 }
 
 async function apiKeyNames(request: APIRequestContext): Promise<string[]> {
-  const res = await request.get(`${ACCOUNTS_URL}/api/api-keys`);
-  expect(res.ok()).toBeTruthy();
-  return ((await res.json()) as { name: string | null }[]).map((key) => key.name ?? '');
+  const res = await request.get(`${AUTH_URL}/api/auth/api-key/list`);
+  expect(res.ok(), await res.text()).toBeTruthy();
+  const body = (await res.json()) as { name: string | null }[] | { apiKeys: { name: string | null }[] };
+  return (Array.isArray(body) ? body : body.apiKeys).map((key) => key.name ?? '');
 }
 
 test.describe('signed requests from accounts', () => {
