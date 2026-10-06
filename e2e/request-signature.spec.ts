@@ -13,9 +13,9 @@ type SignedRequestTarget =
   | { target: 'issue-api-key'; userId: string; name: string; dbBranch?: string | null; timestampOffsetMs?: number }
   | { target: 'get-session'; dbBranch?: string | null; timestampOffsetMs?: number };
 
-const SIGNATURE_HEADER = 'x-karasu-signature';
-const TIMESTAMP_HEADER = 'x-karasu-timestamp';
-const DB_BRANCH_HEADER = 'x-karasu-db-branch';
+const SIGNATURE_HEADER = 'x-signature';
+const TIMESTAMP_HEADER = 'x-signature-timestamp';
+const DB_BRANCH_HEADER = 'x-db-branch';
 
 async function issuedByAccounts(request: APIRequestContext, target: SignedRequestTarget): Promise<SignedAuthRequest> {
   const res = await request.post(`${ACCOUNTS_URL}/api/test/signed-request`, { data: target });
