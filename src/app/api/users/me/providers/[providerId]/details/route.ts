@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getRequestAuth } from '@/lib/auth/server';
+import { resolveRequestAuth } from '@/lib/auth/server';
 import { getProviderProfile } from '@/lib/auth/provider-profile';
-import { requireSession } from '@/lib/api/require-session';
+import { notFound, unauthorized } from '@/lib/api/responses';
 
 /**
  * Returns the authenticated user's profile for a single linked provider.
@@ -9,14 +9,15 @@ import { requireSession } from '@/lib/api/require-session';
  * GET /api/users/me/providers/[providerId]/details
  */
 export async function GET(request: NextRequest, { params }: { params: Promise<{ providerId: string }> }) {
-  const { user, error } = await requireSession();
-  if (error) return error;
+  const resolved = await resolveRequestAuth(request);
+  if ('error' in resolved) return resolved.error;
+
+  const session = await resolved.auth.api.getSession({ headers: request.headers });
+  if (!session) return unauthorized();
 
   const { providerId } = await params;
-  const profile = await getProviderProfile(await getRequestAuth(request.headers), user.id, providerId);
-  if (!profile) {
-    return NextResponse.json({ error: 'Not found' }, { status: 404 });
-  }
+  const profile = await getProviderProfile(resolved.auth, session.user.id, providerId);
+  if (!profile) return notFound();
 
   return NextResponse.json(profile);
 }

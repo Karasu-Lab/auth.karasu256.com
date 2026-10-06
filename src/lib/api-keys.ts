@@ -1,4 +1,4 @@
-import { getRequestAuth } from '@/lib/auth/server';
+import { getRequestAuth, type Auth } from '@/lib/auth/server';
 
 export interface IssuedApiKey {
   id: string;
@@ -8,8 +8,7 @@ export interface IssuedApiKey {
   key: string;
 }
 
-export async function issueApiKey(headers: Headers, userId: string, name: string): Promise<IssuedApiKey> {
-  const auth = await getRequestAuth(headers);
+export async function issueApiKey(auth: Auth, userId: string, name: string): Promise<IssuedApiKey> {
   const created = await auth.api.createApiKey({ body: { name, userId } });
   return {
     id: created.id,
