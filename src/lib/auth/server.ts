@@ -43,13 +43,16 @@ function createAuth(db: Db) {
 export type Auth = ReturnType<typeof createAuth>;
 
 const authByBranch = new Map<string, Promise<Auth>>();
-let defaultAuth: Auth | undefined;
+let defaultAuth: Promise<Auth> | undefined;
 
-async function createBranchAuth(branch: string): Promise<Auth> {
-  const db = createDb(await resolveDatabaseUrl(branch));
+async function initAuth(db: Db): Promise<Auth> {
   const instance = createAuth(db);
   await resetInheritedJwks(instance, db);
   return instance;
+}
+
+async function createBranchAuth(branch: string): Promise<Auth> {
+  return initAuth(createDb(await resolveDatabaseUrl(branch)));
 }
 
 /**
@@ -60,8 +63,8 @@ async function createBranchAuth(branch: string): Promise<Auth> {
  */
 export function getAuth(branch: string | null): Promise<Auth> {
   if (!branch) {
-    defaultAuth ??= createAuth(getDb());
-    return Promise.resolve(defaultAuth);
+    defaultAuth ??= initAuth(getDb());
+    return defaultAuth;
   }
   const existing = authByBranch.get(branch);
   if (existing) return existing;
