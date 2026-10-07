@@ -1,5 +1,5 @@
 import { headers } from 'next/headers';
-import { getRequestAuth, type Auth } from '@/lib/auth/server';
+import { getAuth, type Auth } from '@/lib/auth/server';
 
 /** The authenticated user, as returned by `auth.api.getSession`. */
 export type SessionUser = NonNullable<Awaited<ReturnType<Auth['api']['getSession']>>>['user'];
@@ -12,7 +12,7 @@ export type SessionUser = NonNullable<Awaited<ReturnType<Auth['api']['getSession
  */
 export async function getSessionUser(): Promise<SessionUser | null> {
   const requestHeaders = await headers();
-  const auth = await getRequestAuth(requestHeaders);
+  const auth = await getAuth();
   const session = await auth.api.getSession({ headers: requestHeaders });
   return session?.user ?? null;
 }

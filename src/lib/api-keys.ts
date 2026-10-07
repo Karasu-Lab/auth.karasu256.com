@@ -1,4 +1,4 @@
-import { getRequestAuth, type Auth } from '@/lib/auth/server';
+import { getAuth, type Auth } from '@/lib/auth/server';
 
 export interface IssuedApiKey {
   id: string;
@@ -20,8 +20,8 @@ export async function issueApiKey(auth: Auth, userId: string, name: string): Pro
 }
 
 /** Only key validity is checked here; api.karasu256.com resolves the key's permissions. */
-export async function verifyApiKey(headers: Headers, key: string): Promise<{ userId: string; keyId: string } | null> {
-  const auth = await getRequestAuth(headers);
+export async function verifyApiKey(key: string): Promise<{ userId: string; keyId: string } | null> {
+  const auth = await getAuth();
   const result = await auth.api.verifyApiKey({ body: { key } });
   if (!result.valid || !result.key) return null;
   return { userId: result.key.referenceId, keyId: result.key.id };

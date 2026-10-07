@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { APIError } from 'better-auth/api';
-import { getRequestAuth } from '@/lib/auth/server';
+import { getAuth } from '@/lib/auth/server';
 import { badRequest } from '@/lib/api/responses';
 import { handlePreflight, withCors } from '@/lib/auth/cors';
 
@@ -22,7 +22,7 @@ async function handlePOST(request: NextRequest) {
   if (!parsed.success) return badRequest();
 
   try {
-    const auth = await getRequestAuth(request.headers);
+    const auth = await getAuth();
     await auth.api.setPassword({ body: { newPassword: parsed.data.newPassword }, headers: request.headers });
     return NextResponse.json({ ok: true });
   } catch (err) {

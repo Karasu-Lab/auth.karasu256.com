@@ -10,12 +10,11 @@ interface SignedAuthRequest {
 }
 
 type SignedRequestTarget =
-  | { target: 'issue-api-key'; userId: string; name: string; dbBranch?: string | null; timestampOffsetMs?: number }
-  | { target: 'get-session'; dbBranch?: string | null; timestampOffsetMs?: number };
+  | { target: 'issue-api-key'; userId: string; name: string; timestampOffsetMs?: number }
+  | { target: 'get-session'; timestampOffsetMs?: number };
 
 const SIGNATURE_HEADER = 'x-signature';
 const TIMESTAMP_HEADER = 'x-signature-timestamp';
-const DB_BRANCH_HEADER = 'x-db-branch';
 
 async function issuedByAccounts(request: APIRequestContext, target: SignedRequestTarget): Promise<SignedAuthRequest> {
   const res = await request.post(`${ACCOUNTS_URL}/api/test/signed-request`, { data: target });
@@ -70,7 +69,6 @@ test.describe('signed requests from accounts', () => {
     { name: 'body', tamper: (s) => ({ ...s, body: s.body!.replace('"name":"', '"name":"tampered-') }) },
     { name: 'path', tamper: (s) => ({ ...s, url: s.url.replace('/api/internal/api-keys', '/api/auth/api-key/create') }) },
     { name: 'query', tamper: (s) => ({ ...s, url: `${s.url}?tampered=1` }) },
-    { name: 'database branch', tamper: (s) => ({ ...s, headers: { ...s.headers, [DB_BRANCH_HEADER]: 'preview/tampered' } }) },
     { name: 'timestamp', tamper: (s) => ({ ...s, headers: { ...s.headers, [TIMESTAMP_HEADER]: String(Number(s.headers[TIMESTAMP_HEADER]) + 1) } }) },
     {
       name: 'signature',
@@ -94,7 +92,6 @@ test.describe('signed requests from accounts', () => {
         const headers = { ...s.headers };
         delete headers[SIGNATURE_HEADER];
         delete headers[TIMESTAMP_HEADER];
-        delete headers[DB_BRANCH_HEADER];
         return { ...s, headers };
       },
     },
@@ -124,15 +121,6 @@ test.describe('signed requests from accounts', () => {
 
     const res = await send(request, signed);
     expect(res.status()).toBe(401);
-    expect(await apiKeyNames(request)).not.toContain(name);
-  });
-
-  test('rejects a correctly signed request for the production database branch', async ({ request }) => {
-    const name = `production-branch-${Date.now()}`;
-    const signed = await issuedByAccounts(request, { target: 'issue-api-key', userId, name, dbBranch: 'main' });
-
-    const res = await send(request, signed);
-    expect(res.status()).toBe(400);
     expect(await apiKeyNames(request)).not.toContain(name);
   });
 });

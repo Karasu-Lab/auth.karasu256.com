@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getRequestAuth } from '@/lib/auth/server';
+import { getAuth } from '@/lib/auth/server';
 import { getProviderProfile } from '@/lib/auth/provider-profile';
 import { notFound, unauthorized } from '@/lib/api/responses';
 
@@ -9,7 +9,7 @@ import { notFound, unauthorized } from '@/lib/api/responses';
  * GET /api/users/me/providers/[providerId]/details
  */
 export async function GET(request: NextRequest, { params }: { params: Promise<{ providerId: string }> }) {
-  const auth = await getRequestAuth(request.headers);
+  const auth = await getAuth();
   const session = await auth.api.getSession({ headers: request.headers });
   if (!session) return unauthorized();
 

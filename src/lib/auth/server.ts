@@ -5,13 +5,11 @@ import { oauthProvider } from '@better-auth/oauth-provider';
 import { jwt } from 'better-auth/plugins/jwt';
 import { genericOAuth, multiSession } from 'better-auth/plugins';
 import { nextCookies } from 'better-auth/next-js';
-import { createDb, getDb } from '@Hashibutogarasu/db/client';
+import { getDb } from '@Hashibutogarasu/db/client';
 import { createAuthOptions, type Db } from '@/lib/auth/auth-options';
 import { getMockOAuthProviders, getMockOAuthUrl } from '@/lib/auth/mock-oauth';
 import { resetInheritedJwks } from '@/lib/auth/preview-jwks';
 import { getServerConfig } from '@/lib/config';
-import { resolveDatabaseUrl } from '@/lib/database-url';
-import { getResolvedDbBranch } from '@/lib/db-branch';
 
 function createAuth(db: Db) {
   const { webauthn } = getServerConfig();
@@ -42,8 +40,7 @@ function createAuth(db: Db) {
 
 export type Auth = ReturnType<typeof createAuth>;
 
-const authByBranch = new Map<string, Promise<Auth>>();
-let defaultAuth: Promise<Auth> | undefined;
+let authInstance: Promise<Auth> | undefined;
 
 async function initAuth(db: Db): Promise<Auth> {
   const instance = createAuth(db);
@@ -51,30 +48,8 @@ async function initAuth(db: Db): Promise<Auth> {
   return instance;
 }
 
-async function createBranchAuth(branch: string): Promise<Auth> {
-  return initAuth(createDb(await resolveDatabaseUrl(branch)));
-}
-
-/**
- * Returns the better-auth instance for the given database branch. Production
- * and requests without a branch use `DATABASE_URL`; other branches keep one
- * cached instance each, so a single fixed host (and its OAuth callback URLs)
- * can serve every preview database.
- */
-export function getAuth(branch: string | null): Promise<Auth> {
-  if (!branch) {
-    defaultAuth ??= initAuth(getDb());
-    return defaultAuth;
-  }
-  const existing = authByBranch.get(branch);
-  if (existing) return existing;
-  const pending = createBranchAuth(branch);
-  pending.catch(() => authByBranch.delete(branch));
-  authByBranch.set(branch, pending);
-  return pending;
-}
-
-/** Uses the database branch `proxy.ts` resolved for this request. */
-export function getRequestAuth(headers: Headers): Promise<Auth> {
-  return getAuth(getResolvedDbBranch(headers));
+/** Returns the better-auth instance backed by `DATABASE_URL`, creating it on first use. */
+export function getAuth(): Promise<Auth> {
+  authInstance ??= initAuth(getDb());
+  return authInstance;
 }

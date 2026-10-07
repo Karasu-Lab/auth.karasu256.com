@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
   const parsed = verifyBodySchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return badRequest();
 
-  const result = await verifyApiKey(request.headers, parsed.data.key);
+  const result = await verifyApiKey(parsed.data.key);
   if (!result) return unauthorized();
 
   return NextResponse.json({ userId: result.userId, keyId: result.keyId });
