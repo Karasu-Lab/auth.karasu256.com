@@ -3,6 +3,8 @@ webauthn:
   expectedOrigins:
     - https://local-accounts.karasu256.com
     - https://local-auth.karasu256.com
+    - android:apk-key-hash:bfKpYRlXNOkeRYJCoMaSQi9kSA6IKX4TYjuCHg35mws
+    - android:apk-key-hash:uo795W5PTsfIrzRiahbhbBMqqve55APHGJ3H55qPlDk
 
 trustedOrigins:
   - http://localhost:3000
