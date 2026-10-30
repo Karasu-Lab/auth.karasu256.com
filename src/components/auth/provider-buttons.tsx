@@ -32,10 +32,12 @@ export function ProviderButtons({ continueTo, onSignedIn, disabled = false }: Pr
 
   async function handleSocial(provider: 'google' | 'github') {
     setLoading(provider);
+    // Both URLs must be absolute: better-auth resolves relative ones
+    // against the auth API's origin, where these pages do not exist.
     const { error } = await authClient.signIn.social({
       provider,
-      callbackURL: `/auth/callback?redirectTo=${encodeURIComponent(continueTo)}`,
-      errorCallbackURL: '/oauth/error',
+      callbackURL: `${window.location.origin}/auth/callback?redirectTo=${encodeURIComponent(continueTo)}`,
+      errorCallbackURL: `${window.location.origin}/oauth/error`,
     });
     if (error) setLoading(null);
   }
