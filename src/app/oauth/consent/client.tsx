@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { Container, CardContent, CardHeader, Button } from '@Hashibutogarasu/ui';
+import { Container, CardContent, CardHeader, Button } from '@karasu-lab/ui';
 import { authClient } from '@/lib/auth/client';
 
 interface PublicClient {

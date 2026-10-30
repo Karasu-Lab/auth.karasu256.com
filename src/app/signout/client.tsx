@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { LoadingView } from '@Hashibutogarasu/ui';
+import { LoadingView } from '@karasu-lab/ui';
 import { authClient } from '@/lib/auth/client';
 
 export interface SignOutClientProps {

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ChevronLeft, Fingerprint, KeyRound, LockKeyhole, UserPlus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { Button, Input, Label, PasswordInput, SlideStep, SlideSteps } from '@Hashibutogarasu/ui';
+import { Button, Input, Label, PasswordInput, SlideStep, SlideSteps } from '@karasu-lab/ui';
 import { authClient } from '@/lib/auth/client';
 import { lookupSignIn, type SignInLookup } from '@/lib/sign-in-lookup';
 import { ProviderButtons } from './provider-buttons';

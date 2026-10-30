@@ -4,9 +4,9 @@ import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserPlus } from '@fortawesome/free-solid-svg-icons';
 import { useTranslations } from 'next-intl';
-import { toast } from '@Hashibutogarasu/ui';
+import { toast } from '@karasu-lab/ui';
 import { authClient } from '@/lib/auth/client';
-import { Button, Checkbox, Input, Label, PasswordInput } from '@Hashibutogarasu/ui';
+import { Button, Checkbox, Input, Label, PasswordInput } from '@karasu-lab/ui';
 import { LocalizedPasswordStrengthIndicator } from './localized-password-strength-indicator';
 
 export interface SignUpFormProps {

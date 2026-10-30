@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGoogle, faGithub } from '@fortawesome/free-brands-svg-icons';
 import { faFingerprint } from '@fortawesome/free-solid-svg-icons';
 import { useTranslations } from 'next-intl';
-import { Spinner, toast } from '@Hashibutogarasu/ui';
+import { Spinner, toast } from '@karasu-lab/ui';
 import { authClient } from '@/lib/auth/client';
 
 type Provider = 'google' | 'github' | 'passkey';

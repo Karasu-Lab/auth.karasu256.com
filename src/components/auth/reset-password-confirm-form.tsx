@@ -5,12 +5,12 @@ import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faKey } from '@fortawesome/free-solid-svg-icons';
 import { useTranslations } from 'next-intl';
-import { toast } from '@Hashibutogarasu/ui';
+import { toast } from '@karasu-lab/ui';
 import { authClient } from '@/lib/auth/client';
-import { Button } from '@Hashibutogarasu/ui';
-import { Card, CardContent, CardHeader, CardTitle } from '@Hashibutogarasu/ui';
-import { Input } from '@Hashibutogarasu/ui';
-import { Label } from '@Hashibutogarasu/ui';
+import { Button } from '@karasu-lab/ui';
+import { Card, CardContent, CardHeader, CardTitle } from '@karasu-lab/ui';
+import { Input } from '@karasu-lab/ui';
+import { Label } from '@karasu-lab/ui';
 
 interface Props {
   token: string;
