@@ -25,7 +25,7 @@ jobs:
           prepare-command: node {app_path}/scripts/export-public-vars.mjs {env}
           build-command: pnpm --filter auth.karasu256.com build:worker
           deploy-command: pnpm --filter auth.karasu256.com exec wrangler deploy
-          preview-command: pnpm --filter auth.karasu256.com exec wrangler preview --env preview --name "{branch}"
+          preview-command: pnpm --filter auth.karasu256.com exec wrangler preview --name "{branch}"
           worker-name: auth-karasu256-com
 
   preview:
@@ -47,5 +47,5 @@ jobs:
           prepare-command: node {app_path}/scripts/export-public-vars.mjs {env}
           build-command: pnpm --filter auth.karasu256.com build:worker
           deploy-command: pnpm --filter auth.karasu256.com exec wrangler deploy
-          preview-command: pnpm --filter auth.karasu256.com exec wrangler preview --env preview --name "{branch}"
+          preview-command: pnpm --filter auth.karasu256.com exec wrangler preview --name "{branch}"
           worker-name: auth-karasu256-com
