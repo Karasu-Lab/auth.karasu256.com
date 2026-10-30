@@ -41,8 +41,8 @@ function ProgressBar({ active }: { active: boolean }) {
  * account slides straight to the password step. The password step's
  * "forgot password" link slides to a reset panel instead of leaving the
  * flow. Google, GitHub, and passkey also stay available as round icon
- * buttons under the email step, and a sign-up link button sits at the
- * container's bottom-left. The `continueTo` callback context is held in
+ * buttons under the email step, and a sign-up link sits at the left of
+ * the email step's button row, in line with its Next button. The `continueTo` callback context is held in
  * this component's props for the whole flow, so no step loses it.
  */
 export function SignInFlow({ continueTo, forceLogin }: SignInFlowProps) {
@@ -188,10 +188,6 @@ export function SignInFlow({ continueTo, forceLogin }: SignInFlowProps) {
   return (
     <div className="relative w-full max-w-3xl overflow-hidden rounded-xl bg-card text-sm text-card-foreground shadow-sm ring-1 ring-foreground/10">
       <ProgressBar active={busy} />
-      <Link href="/sign-up" className="absolute bottom-4 left-4 z-10 flex items-center gap-1.5 text-sm font-medium text-primary hover:underline">
-        <UserPlus className="h-4 w-4" />
-        {t('signIn.createAccount')}
-      </Link>
       <div className="flex">
         <div className="hidden w-[30%] shrink-0 items-center justify-center bg-muted/60 sm:flex" aria-hidden>
           <div className="flex h-24 w-24 items-center justify-center rounded-full bg-background shadow-sm ring-1 ring-foreground/10">
@@ -199,7 +195,7 @@ export function SignInFlow({ continueTo, forceLogin }: SignInFlowProps) {
           </div>
         </div>
 
-        <div className="min-w-0 flex-1 p-6 pb-12 sm:p-8 sm:pb-12">
+        <div className="min-w-0 flex-1 p-6 sm:p-8">
           <SlideSteps index={formStepIndex}>
             <SlideStep aria-hidden={step !== 'email'}>
               <form onSubmit={handleEmailSubmit}>
@@ -221,7 +217,11 @@ export function SignInFlow({ continueTo, forceLogin }: SignInFlowProps) {
                   />
                   {emailError && <p className="text-sm text-destructive">{emailError}</p>}
                 </div>
-                <div className="mt-8 flex justify-end pr-1 pb-1">
+                <div className="mt-8 flex items-center justify-between pr-1 pb-1">
+                  <Link href="/sign-up" className="flex items-center gap-1.5 text-sm font-medium text-primary hover:underline">
+                    <UserPlus className="h-4 w-4" />
+                    {t('signIn.createAccount')}
+                  </Link>
                   <Button type="submit" disabled={busy || !email || step !== 'email'}>
                     {t('signIn.next')}
                   </Button>
