@@ -241,7 +241,17 @@ export function SignInFlow({ continueTo, forceLogin }: SignInFlowProps) {
                   />
                   {emailError && <p className="text-sm text-destructive">{emailError}</p>}
                 </div>
-                <div className="mt-8 flex items-center justify-between pr-1 pb-1">
+                {turnstileSiteKey && (
+                  <div className="mt-8 flex justify-center">
+                    <Turnstile
+                      ref={turnstileRef}
+                      siteKey={turnstileSiteKey}
+                      action="sign-in"
+                      onTokenChange={setTurnstileToken}
+                    />
+                  </div>
+                )}
+                <div className="mt-6 flex items-center justify-between pr-1 pb-1">
                   <Link href="/sign-up" className="flex items-center gap-1.5 text-sm font-medium text-primary hover:underline">
                     <UserPlus className="h-4 w-4" />
                     {t('signIn.createAccount')}
@@ -374,13 +384,14 @@ export function SignInFlow({ continueTo, forceLogin }: SignInFlowProps) {
                   <p className="mt-1 text-sm text-muted-foreground">{t('resetPassword.description')}</p>
                   <div className="mt-6 space-y-2">{resetError && <p className="text-sm text-destructive">{resetError}</p>}</div>
                   {turnstileSiteKey && (
-                    <Turnstile
-                      ref={resetTurnstileRef}
-                      siteKey={turnstileSiteKey}
-                      action="password-reset"
-                      onTokenChange={setResetTurnstileToken}
-                      className="mt-6"
-                    />
+                    <div className="mt-6 flex justify-center">
+                      <Turnstile
+                        ref={resetTurnstileRef}
+                        siteKey={turnstileSiteKey}
+                        action="password-reset"
+                        onTokenChange={setResetTurnstileToken}
+                      />
+                    </div>
                   )}
                   <div className="mt-6 flex justify-end pr-1 pb-1">
                     <Button type="submit" disabled={busy || step !== 'reset' || resetTurnstilePending}>
@@ -391,16 +402,6 @@ export function SignInFlow({ continueTo, forceLogin }: SignInFlowProps) {
               )}
             </SlideStep>
           </SlideSteps>
-
-          {turnstileSiteKey && step !== 'reset' && (
-            <Turnstile
-              ref={turnstileRef}
-              siteKey={turnstileSiteKey}
-              action="sign-in"
-              onTokenChange={setTurnstileToken}
-              className="mt-6"
-            />
-          )}
         </div>
       </div>
     </div>
