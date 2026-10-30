@@ -1,69 +1,31 @@
-# Deploy workflow for this repository. This app is a Next.js frontend for
-# the api-auth worker; it is deployed as its own Cloudflare Worker through
-# the OpenNext adapter. The app depends on workspace packages, so the
-# build still runs in the hub repository's tree: this workflow clones the
-# hub (with its submodules) and pins this app's submodule to the commit
-# that triggered the run. It requires the hub's dev branch to carry the
-# submodule layout, and this repository to hold the Actions secrets and
-# variables referenced below under the same names.
-#
-# No custom domain is attached to the worker yet — it is reachable on its
-# workers.dev URL only, and the production domain stays on the current
-# host until the deployment has been verified.
-#
-# Secrets and variables are organized by GitHub Environments: the deploy
-# job runs in the `production` environment and the preview job in the
-# `preview` environment, and any name an environment does not define
-# falls back to the repository-level secret or variable. The app's own
-# per-environment values (origins and public URLs) are declared in
-# wrangler.jsonc, not in GitHub.
-name: auth.karasu256.com Deploy
+name: AUTH Deploy
 
 on:
   push:
+    branches: ["**"]
   workflow_dispatch:
 
-concurrency:
-  group: auth-deploy-${{ github.ref_name }}
-  cancel-in-progress: false
-
-jobs:
   deploy:
     if: github.ref_name == 'main'
     environment: production
     runs-on: ubuntu-latest
     permissions:
       contents: read
-
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
     steps:
-      - name: Assemble the workspace from the hub repository
-        run: |
-          git clone --recurse-submodules --branch dev https://github.com/Karasu-Lab/Karasu-Lab.git .
-          git -C apps/auth.karasu256.com fetch origin "${{ github.sha }}"
-          git -C apps/auth.karasu256.com checkout --detach "${{ github.sha }}"
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - name: Deploy the worker
+        uses: Karasu-Lab/Workers/deploy-worker@v1
         with:
-          node-version: 24
-
-      - name: Set up pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Export the environment variables for the build
-        run: node apps/auth.karasu256.com/scripts/export-public-vars.mjs production
-
-      - name: Build the worker
-        run: pnpm --filter auth.karasu256.com build:worker
-
-      - name: Deploy to production
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-        run: pnpm --filter auth.karasu256.com exec wrangler deploy
+          mode: production
+          hub-repo: Karasu-Lab/Karasu-Lab
+          app-path: apps/auth.karasu256.com
+          prepare-command: node {app_path}/scripts/export-public-vars.mjs {env}
+          build-command: pnpm --filter auth.karasu256.com build:worker
+          deploy-command: pnpm --filter auth.karasu256.com exec wrangler deploy
+          preview-command: pnpm --filter auth.karasu256.com exec wrangler preview --env preview --name "{branch}"
+          worker-name: auth-karasu256-com
 
   preview:
     if: github.ref_name != 'main'
@@ -71,33 +33,18 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
     steps:
-      - name: Assemble the workspace from the hub repository
-        run: |
-          git clone --recurse-submodules --branch dev https://github.com/Karasu-Lab/Karasu-Lab.git .
-          git -C apps/auth.karasu256.com fetch origin "${{ github.sha }}"
-          git -C apps/auth.karasu256.com checkout --detach "${{ github.sha }}"
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - name: Deploy the worker
+        uses: Karasu-Lab/Workers/deploy-worker@v1
         with:
-          node-version: 24
-
-      - name: Set up pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Export the environment variables for the build
-        run: node apps/auth.karasu256.com/scripts/export-public-vars.mjs preview
-
-      - name: Build the worker
-        run: pnpm --filter auth.karasu256.com build:worker
-
-      - name: Create or update the branch preview
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-        run: pnpm --filter auth.karasu256.com exec wrangler preview --env preview --name "${{ github.ref_name }}"
+          mode: preview
+          hub-repo: Karasu-Lab/Karasu-Lab
+          app-path: apps/auth.karasu256.com
+          prepare-command: node {app_path}/scripts/export-public-vars.mjs {env}
+          build-command: pnpm --filter auth.karasu256.com build:worker
+          deploy-command: pnpm --filter auth.karasu256.com exec wrangler deploy
+          preview-command: pnpm --filter auth.karasu256.com exec wrangler preview --env preview --name "{branch}"
+          worker-name: auth-karasu256-com
