@@ -1,5 +1,6 @@
 import { createHash, randomBytes } from 'node:crypto';
 import { expect, type APIRequestContext, type Page } from '@playwright/test';
+import { buildUri } from '@karasu-lab/utils/uri';
 import { ACCOUNTS_URL, AUTH_API_URL, AUTH_URL, MOCK_OAUTH_URL } from '../playwright.config';
 
 export type MockMode = 'redirect' | 'tamper-state';
@@ -17,8 +18,8 @@ export function returnTarget(): string {
   return `${ACCOUNTS_URL}/settings/profile?from=e2e&nonce=${randomBytes(4).toString('hex')}`;
 }
 
-export function signInPath(redirectTo: string): string {
-  return `/sign-in?redirectTo=${encodeURIComponent(redirectTo)}`;
+export function signInPath(next: string): string {
+  return buildUri('/sign-in', { next });
 }
 
 export async function configureMockOAuth(request: APIRequestContext, mode: MockMode, email?: string): Promise<void> {

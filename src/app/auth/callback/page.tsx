@@ -9,15 +9,15 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 interface Props {
-  searchParams: Promise<{ redirectTo?: string | string[] }>;
+  searchParams: Promise<{ next?: string | string[] }>;
 }
 
 /** Intermediate page shown during the OAuth sign-in redirect flow. */
 export default async function OAuthCallbackPage({ searchParams }: Props) {
-  const { redirectTo } = await searchParams;
+  const { next } = await searchParams;
   return (
     <main className="flex flex-1 items-center justify-center p-4">
-      <OAuthCallbackClient redirectTo={getRedirectTo(redirectTo)} />
+      <OAuthCallbackClient redirectTo={getRedirectTo(next)} />
     </main>
   );
 }
