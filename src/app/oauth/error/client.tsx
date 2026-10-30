@@ -4,8 +4,8 @@ import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
-import { Container, CardContent, CardHeader } from '@Hashibutogarasu/ui';
-import { Button } from '@Hashibutogarasu/ui';
+import { Container, CardContent, CardHeader } from '@karasu-lab/ui';
+import { Button } from '@karasu-lab/ui';
 
 /**
  * Displays an error message when the OAuth sign-in flow fails.

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
-import { Container, CardContent, CardHeader } from '@Hashibutogarasu/ui';
+import { Container, CardContent, CardHeader } from '@karasu-lab/ui';
 import { SignUpForm } from '@/components/auth/sign-up-form';
 import { getContinueTo } from '@/lib/redirect-server';
 
