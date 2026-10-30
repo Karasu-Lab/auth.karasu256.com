@@ -46,12 +46,10 @@
       "rateLimitedLessThan": "Rate limit reached. Please try again in less than {minutes} minute(s)"
     },
     "next": "Next",
-    "emailDescription": "Enter your email address. If SSO is configured for its domain, you will be taken to your organization's identity provider (IdP).",
     "passwordTitle": "Enter your password",
     "backToSignIn": "Back to sign in",
     "passkey": {
       "title": "Sign in with a passkey",
-      "description": "This account has a passkey registered. Use it to verify it is you.",
       "button": "Use a passkey"
     },
     "methods": {

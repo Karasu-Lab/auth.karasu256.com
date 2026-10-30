@@ -224,7 +224,6 @@ export function SignInFlow({ continueTo, forceLogin }: SignInFlowProps) {
             <SlideStep aria-hidden={step !== 'email'}>
               <form onSubmit={handleEmailSubmit}>
                 <h1 className="text-lg font-semibold">{t('signIn.title')}</h1>
-                <p className="mt-1 text-sm text-muted-foreground">{t('signIn.emailDescription')}</p>
                 <div className="mt-6 space-y-2">
                   <Label htmlFor="sign-in-email">{t('signIn.email')}</Label>
                   <Input
@@ -279,7 +278,6 @@ export function SignInFlow({ continueTo, forceLogin }: SignInFlowProps) {
                   <Fingerprint className="h-7 w-7 text-muted-foreground" />
                 </span>
                 <h1 className="mt-3 text-lg font-semibold">{t('signIn.passkey.title')}</h1>
-                <p className="mt-1 text-sm text-muted-foreground">{t('signIn.passkey.description')}</p>
               </div>
               <div className="mt-6 space-y-2">
                 <Button type="button" className="w-full" disabled={busy || step !== 'passkey'} onClick={() => void handlePasskey()}>
