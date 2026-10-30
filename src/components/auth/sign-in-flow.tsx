@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { ChevronLeft, Fingerprint, KeyRound, LockKeyhole, UserPlus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { Button, Input, Label, PasswordInput, SlideStep, SlideSteps } from '@karasu-lab/ui';
+import { Button, Input, Label, PasswordInput, SlideStep, SlideSteps, Turnstile, type TurnstileHandle } from '@karasu-lab/ui';
 import { authClient } from '@/lib/auth/client';
 import { lookupSignIn, type SignInLookup } from '@/lib/sign-in-lookup';
 import { ProviderButtons } from './provider-buttons';
@@ -59,6 +59,18 @@ export function SignInFlow({ continueTo, forceLogin }: SignInFlowProps) {
   const [resetError, setResetError] = useState<string | null>(null);
   const [resetSent, setResetSent] = useState(false);
 
+  // Bot verification for the credential submissions. The widget mints a
+  // single-use token the gated calls carry; while a site key is
+  // configured, those submissions wait for a token, and the widget is
+  // reset after every attempt because a redeemed token cannot be reused.
+  const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileHandle>(null);
+  const turnstilePending = Boolean(turnstileSiteKey) && !turnstileToken;
+  const [resetTurnstileToken, setResetTurnstileToken] = useState<string | null>(null);
+  const resetTurnstileRef = useRef<TurnstileHandle>(null);
+  const resetTurnstilePending = Boolean(turnstileSiteKey) && !resetTurnstileToken;
+
   // A user who already has a session does not need this form, unless the
   // caller explicitly asked to sign in another account on top of it.
   useEffect(() => {
@@ -91,7 +103,11 @@ export function SignInFlow({ continueTo, forceLogin }: SignInFlowProps) {
       } else {
         setLookup(result.lookup);
         if (result.lookup.sso) {
-          const { data, error } = await authClient.signIn.sso({ email, callbackURL: continueTo });
+          const { data, error } = await authClient.signIn.sso(
+            { email, callbackURL: continueTo },
+            turnstileToken ? { headers: { 'cf-turnstile-response': turnstileToken } } : undefined,
+          );
+          turnstileRef.current?.reset();
           const url = (data as { url?: string } | null)?.url;
           if (!error && url) {
             window.location.replace(url);
@@ -138,8 +154,12 @@ export function SignInFlow({ continueTo, forceLogin }: SignInFlowProps) {
     e.preventDefault();
     setBusy(true);
     setPasswordError(null);
-    const { data, error } = await authClient.signIn.email({ email, password, callbackURL: continueTo });
+    const { data, error } = await authClient.signIn.email(
+      { email, password, callbackURL: continueTo },
+      turnstileToken ? { headers: { 'cf-turnstile-response': turnstileToken } } : undefined,
+    );
     if (error) {
+      turnstileRef.current?.reset();
       setPasswordError(error.status === 401 ? t('signIn.error.invalidPassword') : t('signIn.error.unknown'));
       setBusy(false);
       return;
@@ -155,10 +175,14 @@ export function SignInFlow({ continueTo, forceLogin }: SignInFlowProps) {
     // The redirectTo must be absolute: the auth API resolves a relative
     // path against its own origin when it redirects after verifying the
     // token, which lands the user on the API host instead of this page.
-    const { error } = await authClient.requestPasswordReset({
-      email,
-      redirectTo: `${window.location.origin}/reset-password/confirm`,
-    });
+    const { error } = await authClient.requestPasswordReset(
+      {
+        email,
+        redirectTo: `${window.location.origin}/reset-password/confirm`,
+      },
+      resetTurnstileToken ? { headers: { 'cf-turnstile-response': resetTurnstileToken } } : undefined,
+    );
+    resetTurnstileRef.current?.reset();
     if (error) {
       setResetError(t('resetPassword.sendError'));
       setBusy(false);
@@ -222,7 +246,7 @@ export function SignInFlow({ continueTo, forceLogin }: SignInFlowProps) {
                     <UserPlus className="h-4 w-4" />
                     {t('signIn.createAccount')}
                   </Link>
-                  <Button type="submit" disabled={busy || !email || step !== 'email'}>
+                  <Button type="submit" disabled={busy || !email || step !== 'email' || turnstilePending}>
                     {t('signIn.next')}
                   </Button>
                 </div>
@@ -328,7 +352,7 @@ export function SignInFlow({ continueTo, forceLogin }: SignInFlowProps) {
                   </button>
                 </div>
                 <div className="mt-6 flex justify-end pr-1 pb-1">
-                  <Button type="submit" disabled={busy || !password || step !== 'password'}>
+                  <Button type="submit" disabled={busy || !password || step !== 'password' || turnstilePending}>
                     {t('signIn.submit')}
                   </Button>
                 </div>
@@ -349,8 +373,17 @@ export function SignInFlow({ continueTo, forceLogin }: SignInFlowProps) {
                 <form onSubmit={handleResetSubmit}>
                   <p className="mt-1 text-sm text-muted-foreground">{t('resetPassword.description')}</p>
                   <div className="mt-6 space-y-2">{resetError && <p className="text-sm text-destructive">{resetError}</p>}</div>
+                  {turnstileSiteKey && (
+                    <Turnstile
+                      ref={resetTurnstileRef}
+                      siteKey={turnstileSiteKey}
+                      action="password-reset"
+                      onTokenChange={setResetTurnstileToken}
+                      className="mt-6"
+                    />
+                  )}
                   <div className="mt-6 flex justify-end pr-1 pb-1">
-                    <Button type="submit" disabled={busy || step !== 'reset'}>
+                    <Button type="submit" disabled={busy || step !== 'reset' || resetTurnstilePending}>
                       {busy ? t('resetPassword.sending') : t('resetPassword.sendLink')}
                     </Button>
                   </div>
@@ -358,6 +391,16 @@ export function SignInFlow({ continueTo, forceLogin }: SignInFlowProps) {
               )}
             </SlideStep>
           </SlideSteps>
+
+          {turnstileSiteKey && step !== 'reset' && (
+            <Turnstile
+              ref={turnstileRef}
+              siteKey={turnstileSiteKey}
+              action="sign-in"
+              onTokenChange={setTurnstileToken}
+              className="mt-6"
+            />
+          )}
         </div>
       </div>
     </div>

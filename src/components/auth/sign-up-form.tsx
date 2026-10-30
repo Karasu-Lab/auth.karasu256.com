@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserPlus } from '@fortawesome/free-solid-svg-icons';
 import { useTranslations } from 'next-intl';
 import { toast } from '@karasu-lab/ui';
 import { authClient } from '@/lib/auth/client';
-import { Button, Checkbox, Input, Label, PasswordInput } from '@karasu-lab/ui';
+import { Button, Checkbox, Input, Label, PasswordInput, Turnstile, type TurnstileHandle } from '@karasu-lab/ui';
 import { LocalizedPasswordStrengthIndicator } from './localized-password-strength-indicator';
 
 export interface SignUpFormProps {
@@ -25,7 +25,13 @@ export function SignUpForm({ continueTo }: SignUpFormProps) {
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const registerDisabled = loading || !email || !password || !agreedToTerms;
+  // Bot verification: while a site key is configured, registration
+  // waits for the widget's single-use token and carries it along.
+  const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileHandle>(null);
+
+  const registerDisabled = loading || !email || !password || !agreedToTerms || (Boolean(turnstileSiteKey) && !turnstileToken);
   const termsUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? ''}/terms`;
 
   async function handleRegister(e: React.FormEvent) {
@@ -34,11 +40,13 @@ export function SignUpForm({ continueTo }: SignUpFormProps) {
     await authClient.signUp.email(
       { email, password, name: email },
       {
+        headers: turnstileToken ? { 'cf-turnstile-response': turnstileToken } : undefined,
         onSuccess: (ctx) => {
           const data = ctx.data as { redirect?: boolean; url?: string } | null;
           window.location.replace(data?.redirect && data.url ? data.url : continueTo);
         },
         onError: (ctx) => {
+          turnstileRef.current?.reset();
           toast.error(ctx.error.message);
           setLoading(false);
         },
@@ -86,6 +94,9 @@ export function SignUpForm({ continueTo }: SignUpFormProps) {
           })}
         </Label>
       </div>
+      {turnstileSiteKey && (
+        <Turnstile ref={turnstileRef} siteKey={turnstileSiteKey} action="sign-up" onTokenChange={setTurnstileToken} />
+      )}
       <Button type="submit" className="w-full" disabled={registerDisabled}>
         <FontAwesomeIcon icon={faUserPlus} />
         {loading ? t('signIn.creatingAccount') : t('signIn.createAccount')}
