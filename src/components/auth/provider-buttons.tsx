@@ -6,6 +6,7 @@ import { faGoogle, faGithub } from '@fortawesome/free-brands-svg-icons';
 import { faFingerprint } from '@fortawesome/free-solid-svg-icons';
 import { useTranslations } from 'next-intl';
 import { Spinner, toast } from '@karasu-lab/ui';
+import { buildUriWithNext } from '@karasu-lab/utils/uri';
 import { authClient } from '@/lib/auth/client';
 
 type Provider = 'google' | 'github' | 'passkey';
@@ -32,10 +33,12 @@ export function ProviderButtons({ continueTo, onSignedIn, disabled = false }: Pr
 
   async function handleSocial(provider: 'google' | 'github') {
     setLoading(provider);
+    // Both URLs must be absolute: better-auth resolves relative ones
+    // against the auth API's origin, where these pages do not exist.
     const { error } = await authClient.signIn.social({
       provider,
-      callbackURL: `/auth/callback?redirectTo=${encodeURIComponent(continueTo)}`,
-      errorCallbackURL: '/oauth/error',
+      callbackURL: buildUriWithNext(`${window.location.origin}/auth/callback`, continueTo),
+      errorCallbackURL: `${window.location.origin}/oauth/error`,
     });
     if (error) setLoading(null);
   }
