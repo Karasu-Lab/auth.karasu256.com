@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { LoadingView } from '@karasu-lab/ui';
-import { authClient } from '@/lib/auth/client';
+import { sdk } from '@/lib/auth/client';
 
 export interface OAuthCallbackClientProps {
   redirectTo: string;
@@ -12,7 +12,8 @@ export interface OAuthCallbackClientProps {
 /**
  * better-auth's own OAuth callback redirects here with the session cookie
  * already set (via `nextCookies()`), so this only confirms the session
- * actually landed before continuing to the already-validated `redirectTo`.
+ * actually landed — through the SDK's JWT exchange, not a session
+ * lookup — before continuing to the already-validated `redirectTo`.
  *
  * On failure, redirects to /oauth/error.
  */
@@ -21,7 +22,7 @@ export function OAuthCallbackClient({ redirectTo }: OAuthCallbackClientProps) {
 
   useEffect(() => {
     async function completeSignIn() {
-      const { data } = await authClient.getSession();
+      const data = await sdk.getSession();
       if (!data) {
         window.location.replace('/oauth/error');
         return;

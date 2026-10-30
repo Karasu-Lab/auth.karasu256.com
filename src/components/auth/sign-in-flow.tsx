@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { ChevronLeft, Fingerprint, KeyRound, LockKeyhole, UserPlus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Button, Input, Label, PasswordInput, SlideStep, SlideSteps, Turnstile, type TurnstileHandle } from '@karasu-lab/ui';
-import { authClient } from '@/lib/auth/client';
+import { authClient, sdk } from '@/lib/auth/client';
 import { lookupSignIn, type SignInLookup } from '@/lib/sign-in-lookup';
 import { ProviderButtons } from './provider-buttons';
 
@@ -140,7 +140,7 @@ export function SignInFlow({ continueTo, forceLogin }: SignInFlowProps) {
     }
     // The passkey ceremony is discoverable-credential based, so confirm
     // it signed in the account whose email address was entered.
-    const { data: current } = await authClient.getSession();
+    const current = await sdk.getSession();
     if (current && current.user.email.toLowerCase() !== email.trim().toLowerCase()) {
       await authClient.signOut();
       setPasskeyError(t('signIn.error.passkeyMismatch'));
