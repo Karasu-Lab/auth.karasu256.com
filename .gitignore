@@ -32,3 +32,7 @@ next-env.d.ts
 drizzle/*
 !drizzle/migrations
 .vercel
+
+# OpenNext / Wrangler
+.open-next/
+.wrangler/

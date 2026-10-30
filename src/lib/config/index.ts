@@ -1,39 +1,41 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import { parse as parseYaml } from 'yaml';
 import { z } from 'zod';
 
-const configFileSchema = z.object({
-  trustedOrigins: z.array(z.string().url()).min(1),
+/**
+ * Server configuration as a zod schema declaration only: every value is
+ * supplied by the environment — the per-environment vars in wrangler.jsonc
+ * when deployed as a worker, or .env.development locally — and nothing is
+ * hardcoded here.
+ */
+const serverConfigSchema = z.object({
+  TRUSTED_ORIGINS: z
+    .string()
+    .min(1)
+    .transform((value) =>
+      value
+        .split(',')
+        .map((origin) => origin.trim())
+        .filter((origin) => origin.length > 0),
+    )
+    .pipe(z.array(z.string().url()).min(1)),
 });
 
-export type ServerConfig = z.infer<typeof configFileSchema>;
+export interface ServerConfig {
+  /** The only redirect targets the sign-in and sign-out pages accept. */
+  trustedOrigins: string[];
+}
 
 let cached: ServerConfig | undefined;
 
 /**
- * Selects the environment-specific config file name: `config.preview.yml` on
- * Vercel Preview deployments (`VERCEL_ENV=preview`, served only from
- * dev-auth.karasu256.com), otherwise `config.production.yml` or
- * `config.development.yml` by `NODE_ENV`.
- */
-function getEnvConfigFileName(): string {
-  if (process.env.VERCEL_ENV === 'preview') return 'config.preview.yml';
-  return process.env.NODE_ENV === 'production' ? 'config.production.yml' : 'config.development.yml';
-}
-
-/**
- * Returns the validated server configuration read from the
- * environment-specific `config/*.yml` file. The trusted origins are the only
- * redirect targets the sign-in and sign-out pages accept. The result is
- * cached for the lifetime of the Node.js process.
+ * Returns the validated server configuration. The result is cached for
+ * the lifetime of the process.
  *
- * @throws when the config file is missing or fails validation.
+ * @throws when the environment is missing a value or fails validation.
  */
 export function getServerConfig(): ServerConfig {
   if (cached !== undefined) return cached;
 
-  const raw = fs.readFileSync(path.join(process.cwd(), 'config', getEnvConfigFileName()), 'utf-8');
-  cached = configFileSchema.parse(parseYaml(raw));
+  const env = serverConfigSchema.parse(process.env);
+  cached = { trustedOrigins: env.TRUSTED_ORIGINS };
   return cached;
 }
