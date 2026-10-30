@@ -95,7 +95,9 @@ export function SignUpForm({ continueTo }: SignUpFormProps) {
         </Label>
       </div>
       {turnstileSiteKey && (
-        <Turnstile ref={turnstileRef} siteKey={turnstileSiteKey} action="sign-up" onTokenChange={setTurnstileToken} />
+        <div className="flex justify-center">
+          <Turnstile ref={turnstileRef} siteKey={turnstileSiteKey} action="sign-up" onTokenChange={setTurnstileToken} />
+        </div>
       )}
       <Button type="submit" className="w-full" disabled={registerDisabled}>
         <FontAwesomeIcon icon={faUserPlus} />
