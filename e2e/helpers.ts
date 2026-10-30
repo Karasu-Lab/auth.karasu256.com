@@ -1,6 +1,6 @@
 import { createHash, randomBytes } from 'node:crypto';
 import { expect, type APIRequestContext, type Page } from '@playwright/test';
-import { buildUri } from '@karasu-lab/utils/uri';
+import { buildUri } from '@karasu-lab/sdk/uri';
 import { ACCOUNTS_URL, AUTH_API_URL, AUTH_URL, MOCK_OAUTH_URL } from '../playwright.config';
 
 export type MockMode = 'redirect' | 'tamper-state';
