@@ -26,5 +26,5 @@ export function getContinueTo(searchParams: SearchParams): string {
     }
     return `${process.env.NEXT_PUBLIC_AUTH_API_URL ?? ''}/api/auth/oauth2/authorize?${params.toString()}`;
   }
-  return getRedirectTo(searchParams.redirectTo);
+  return getRedirectTo(searchParams.next);
 }
