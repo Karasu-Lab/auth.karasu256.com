@@ -281,12 +281,20 @@
   },
   "oauthConsent": {
     "title": "Authorize this app?",
-    "description": "{name} is requesting access to the following:",
-    "connect": "Connect",
+    "description": "{name} is requesting the following permissions.",
+    "approve": "Approve",
     "deny": "Deny",
     "account": {
       "title": "Choose an account",
       "description": "Choose an account to continue"
+    },
+    "scopes": {
+      "openid": "Sign in with OpenID Connect",
+      "profile": "Read your profile information",
+      "email": "Read your email address",
+      "offline_access": "Access while you are offline (refresh token)",
+      "read:profile": "Read your profile",
+      "write:profile": "Update your profile"
     }
   },
   "oauth": {
