@@ -282,10 +282,17 @@
   "oauthConsent": {
     "title": "是否授权此应用？",
     "description": "{name} 请求访问以下内容：",
-    "accept": "允许",
-    "deny": "拒绝"
+    "connect": "连接",
+    "deny": "拒绝",
+    "account": {
+      "title": "选择账号",
+      "description": "请选择要继续使用的账号"
+    }
   },
   "oauth": {
+    "testCallback": {
+      "title": "测试回调"
+    },
     "errors": {
       "invalid_grant": "授权码无效或已过期",
       "invalid_client": "客户端凭据无效",

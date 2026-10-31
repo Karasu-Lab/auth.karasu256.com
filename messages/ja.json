@@ -282,10 +282,17 @@
   "oauthConsent": {
     "title": "連携を許可しますか？",
     "description": "{name} が以下の情報へのアクセスを求めています。",
-    "accept": "許可する",
-    "deny": "拒否する"
+    "connect": "接続",
+    "deny": "拒否する",
+    "account": {
+      "title": "アカウントを選択",
+      "description": "続行するにはアカウントを選択してください"
+    }
   },
   "oauth": {
+    "testCallback": {
+      "title": "テストコールバック"
+    },
     "errors": {
       "invalid_grant": "認可コードが無効または期限切れです",
       "invalid_client": "クライアント認証情報が無効です",

@@ -2,36 +2,35 @@
 
 import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGoogle, faGithub } from '@fortawesome/free-brands-svg-icons';
 import { faFingerprint } from '@fortawesome/free-solid-svg-icons';
 import { useTranslations } from 'next-intl';
 import { Spinner, toast } from '@karasu-lab/ui';
 import { buildUriWithNext } from '@karasu-lab/sdk/uri';
 import { authClient } from '@/lib/auth/client';
-
-type Provider = 'google' | 'github' | 'passkey';
+import { socialProviders } from './provider-definitions';
 
 export interface ProviderButtonsProps {
   continueTo: string;
   /** Called after a passkey sign-in, with the URL better-auth asked to continue to, if any. */
   onSignedIn: (redirectUrl?: string) => void;
-  /** Disables all three buttons, e.g. while the email step is working. */
+  /** Disables all the buttons, e.g. while the email step is working. */
   disabled?: boolean;
 }
 
 /**
- * The provider sign-in buttons as a row of round icon buttons: Google,
- * GitHub, and passkey. They are plain press targets — standard hover and
- * pressed feedback, no sliding animation — and sit side by side under the
- * email step. Social sign-in delegates the OAuth handshake to better-auth,
- * which lands on `/auth/callback` to confirm the session before
- * continuing; the passkey button runs a discoverable-credential ceremony.
+ * The provider sign-in buttons as a row of round icon buttons: the social
+ * providers from `provider-definitions`, plus passkey. They are plain
+ * press targets — standard hover and pressed feedback, no sliding
+ * animation — and sit side by side under the email step. Social sign-in
+ * delegates the OAuth handshake to better-auth, which lands on
+ * `/auth/callback` to confirm the session before continuing; the passkey
+ * button runs a discoverable-credential ceremony.
  */
 export function ProviderButtons({ continueTo, onSignedIn, disabled = false }: ProviderButtonsProps) {
   const t = useTranslations();
-  const [loading, setLoading] = useState<Provider | null>(null);
+  const [loading, setLoading] = useState<string | null>(null);
 
-  async function handleSocial(provider: 'google' | 'github') {
+  async function handleSocial(provider: string) {
     setLoading(provider);
     // Both URLs must be absolute: better-auth resolves relative ones
     // against the auth API's origin, where these pages do not exist.
@@ -60,26 +59,19 @@ export function ProviderButtons({ continueTo, onSignedIn, disabled = false }: Pr
 
   return (
     <div className="flex items-center justify-center gap-3">
-      <button
-        type="button"
-        aria-label="Google"
-        title="Google"
-        className={buttonClass}
-        disabled={disabled || loading !== null}
-        onClick={() => void handleSocial('google')}
-      >
-        {loading === 'google' ? <Spinner /> : <FontAwesomeIcon icon={faGoogle} className="h-5 w-5" />}
-      </button>
-      <button
-        type="button"
-        aria-label="GitHub"
-        title="GitHub"
-        className={buttonClass}
-        disabled={disabled || loading !== null}
-        onClick={() => void handleSocial('github')}
-      >
-        {loading === 'github' ? <Spinner /> : <FontAwesomeIcon icon={faGithub} className="h-5 w-5" />}
-      </button>
+      {socialProviders.map(({ id, label, icon }) => (
+        <button
+          key={id}
+          type="button"
+          aria-label={label}
+          title={label}
+          className={buttonClass}
+          disabled={disabled || loading !== null}
+          onClick={() => void handleSocial(id)}
+        >
+          {loading === id ? <Spinner /> : <FontAwesomeIcon icon={icon} className="h-5 w-5" />}
+        </button>
+      ))}
       <button
         type="button"
         aria-label={t('passkey.signIn')}
