@@ -17,9 +17,10 @@ function TestCallbackContent() {
     const code = params.get('code') ?? undefined;
     const state = params.get('state') ?? undefined;
     const error = params.get('error') ?? undefined;
+    const errorDescription = params.get('error_description') ?? undefined;
 
     if (window.opener) {
-      window.opener.postMessage({ type: 'oauth_test_callback', code, state, error }, '*');
+      window.opener.postMessage({ type: 'oauth_test_callback', code, state, error, errorDescription }, '*');
       window.close();
     }
   }, [params]);
