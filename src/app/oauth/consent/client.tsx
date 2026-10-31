@@ -42,8 +42,10 @@ function ProgressBar({ active }: { active: boolean }) {
  * (multi-session), and picking one slides to the consent step. The
  * consent step is composed, from the top, of a row holding the user's
  * icon, a connection icon, and the destination app's icon (a question
- * mark placeholder when the client has no logo); the permission scopes
- * the client requests, translated on the client; and, pinned to the
+ * mark placeholder when the client has no logo); a scopes container
+ * made of the line naming the app as requesting the following
+ * permissions and the vertical list of those scopes, translated on the
+ * client; and, pinned to the
  * bottom, the approve and deny buttons stacked vertically. Approving
  * activates the chosen account when it is not the active session,
  * records the consent, and redirects to the URL the authorization
@@ -203,24 +205,22 @@ function ConsentContent() {
                   )}
                 </div>
 
-                <h1 className="mt-5 text-center text-lg font-semibold">{t('oauthConsent.title')}</h1>
-                <p className="mt-1 text-center text-sm text-muted-foreground">
-                  {t('oauthConsent.description', { name: client?.client_name ?? clientId ?? '' })}
-                </p>
-
-                {scopes.length > 0 && (
-                  <ul className="mt-6 space-y-2.5">
-                    {scopes.map((s) => {
-                      const key = `oauthConsent.scopes.${s}`;
-                      return (
-                        <li key={s} className="flex items-start gap-2.5">
-                          <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                          <span>{t.has(key) ? t(key) : s}</span>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                )}
+                <div className="mt-6">
+                  <p className="text-sm">{t('oauthConsent.description', { name: client?.client_name ?? clientId ?? '' })}</p>
+                  {scopes.length > 0 && (
+                    <ul className="mt-3 space-y-2.5">
+                      {scopes.map((s) => {
+                        const key = `oauthConsent.scopes.${s}`;
+                        return (
+                          <li key={s} className="flex items-start gap-2.5">
+                            <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                            <span>{t.has(key) ? t(key) : s}</span>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </div>
 
                 <div className="mt-auto flex flex-col gap-2 pt-8">
                   <Button className="w-full" disabled={submitting || step !== 'consent' || !chosen} onClick={() => void respond(true)}>

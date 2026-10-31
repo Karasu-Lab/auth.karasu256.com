@@ -281,7 +281,7 @@
   },
   "oauthConsent": {
     "title": "是否授权此应用？",
-    "description": "{name} 请求访问以下内容：",
+    "description": "{name} 正在请求以下权限。",
     "approve": "批准",
     "deny": "拒绝",
     "account": {

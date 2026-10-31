@@ -281,7 +281,7 @@
   },
   "oauthConsent": {
     "title": "Authorize this app?",
-    "description": "{name} is requesting access to the following:",
+    "description": "{name} is requesting the following permissions.",
     "approve": "Approve",
     "deny": "Deny",
     "account": {

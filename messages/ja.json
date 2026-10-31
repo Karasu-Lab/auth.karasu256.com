@@ -281,7 +281,7 @@
   },
   "oauthConsent": {
     "title": "連携を許可しますか？",
-    "description": "{name} が以下の情報へのアクセスを求めています。",
+    "description": "{name} は以下の権限を要求しています。",
     "approve": "承認する",
     "deny": "拒否する",
     "account": {
