@@ -282,11 +282,19 @@
   "oauthConsent": {
     "title": "連携を許可しますか？",
     "description": "{name} が以下の情報へのアクセスを求めています。",
-    "connect": "接続",
+    "approve": "承認する",
     "deny": "拒否する",
     "account": {
       "title": "アカウントを選択",
       "description": "続行するにはアカウントを選択してください"
+    },
+    "scopes": {
+      "openid": "OpenID Connect でサインインする",
+      "profile": "プロフィール情報を取得する",
+      "email": "メールアドレスを取得する",
+      "offline_access": "オフラインでアクセスする（リフレッシュトークン）",
+      "read:profile": "プロフィールを読み取る",
+      "write:profile": "プロフィールを更新する"
     }
   },
   "oauth": {

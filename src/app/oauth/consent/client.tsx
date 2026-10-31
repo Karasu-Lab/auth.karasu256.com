@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { ChevronLeft, KeyRound, LoaderCircle } from 'lucide-react';
+import { Check, ChevronLeft, CircleQuestionMark, Link2, LoaderCircle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Button, SlideStep, SlideSteps, UserAvatar, toast } from '@karasu-lab/ui';
 import { authClient } from '@/lib/auth/client';
@@ -36,16 +36,18 @@ function ProgressBar({ active }: { active: boolean }) {
 }
 
 /**
- * Consent screen for the OAuth provider's authorization flow, laid out
- * like the SSO site's sign-in page: a wide container with a panel on the
- * left and sliding steps on the right. The first step is an account
+ * Consent screen for the OAuth provider's authorization flow. The flow is
+ * account selection, then authorization: the first step is an account
  * chooser listing the device sessions already signed in on this device
- * (multi-session); picking one slides to the consent step, which presents
- * the permissions the client requests — the scope grant is checked and
- * approved here, as part of the real authorization, not by a separate
- * test. The Connect button activates the chosen account when it is not
- * the active session, records the consent, and redirects to the URL the
- * authorization server returns; Deny records a refusal the same way.
+ * (multi-session), and picking one slides to the consent step. The
+ * consent step is composed, from the top, of a row holding the user's
+ * icon, a connection icon, and the destination app's icon (a question
+ * mark placeholder when the client has no logo); the permission scopes
+ * the client requests, translated on the client; and, pinned to the
+ * bottom, the approve and deny buttons stacked vertically. Approving
+ * activates the chosen account when it is not the active session,
+ * records the consent, and redirects to the URL the authorization
+ * server returns; denying records a refusal the same way.
  */
 function ConsentContent() {
   const t = useTranslations();
@@ -133,98 +135,110 @@ function ConsentContent() {
   const stepIndex = Math.max(0, STEPS.indexOf(step));
 
   return (
-    <div className="relative w-full max-w-3xl overflow-hidden rounded-xl bg-card text-sm text-card-foreground shadow-sm ring-1 ring-foreground/10">
+    <div className="relative w-full max-w-md overflow-hidden rounded-xl bg-card text-sm text-card-foreground shadow-sm ring-1 ring-foreground/10">
       <ProgressBar active={submitting} />
-      <div className="flex">
-        <div className="hidden w-[30%] shrink-0 items-center justify-center bg-muted/60 sm:flex" aria-hidden>
-          {client?.logo_uri ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={client.logo_uri} alt="" className="h-24 w-24 rounded-full object-cover shadow-sm ring-1 ring-foreground/10" />
-          ) : (
-            <div className="flex h-24 w-24 items-center justify-center rounded-full bg-background shadow-sm ring-1 ring-foreground/10">
-              <KeyRound className="h-10 w-10 text-muted-foreground" />
-            </div>
-          )}
-        </div>
+      <div className="p-6 sm:p-8">
+        {accounts === null ? (
+          <div className="flex min-h-48 items-center justify-center">
+            <LoaderCircle className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : (
+          <SlideSteps index={stepIndex}>
+            <SlideStep aria-hidden={step !== 'account'}>
+              <div>
+                <h1 className="text-lg font-semibold">{t('oauthConsent.account.title')}</h1>
+                <p className="mt-1 text-sm text-muted-foreground">{t('oauthConsent.account.description')}</p>
 
-        <div className="min-w-0 flex-1 p-6 sm:p-8">
-          {accounts === null ? (
-            <div className="flex min-h-48 items-center justify-center">
-              <LoaderCircle className="h-6 w-6 animate-spin text-muted-foreground" />
-            </div>
-          ) : (
-            <SlideSteps index={stepIndex}>
-              <SlideStep aria-hidden={step !== 'account'}>
-                <div>
-                  <h1 className="text-lg font-semibold">{t('oauthConsent.account.title')}</h1>
-                  <p className="mt-1 text-sm text-muted-foreground">{t('oauthConsent.account.description')}</p>
-
-                  <div className="mt-5 max-h-64 overflow-y-auto pr-1">
-                    <ul className="divide-y divide-foreground/10">
-                      {accounts.map((entry) => (
-                        <li key={entry.session.token}>
-                          <button
-                            type="button"
-                            disabled={submitting || step !== 'account'}
-                            onClick={() => selectAccount(entry)}
-                            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-muted disabled:opacity-50"
-                          >
-                            <UserAvatar uid={entry.user.id} iconUrl={entry.user.image} size={36} />
-                            <span className="min-w-0">
-                              <span className="block truncate font-medium">{entry.user.name}</span>
-                              <span className="block truncate text-xs text-muted-foreground">{entry.user.email}</span>
-                            </span>
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                <div className="mt-5 max-h-64 overflow-y-auto pr-1">
+                  <ul className="divide-y divide-foreground/10">
+                    {accounts.map((entry) => (
+                      <li key={entry.session.token}>
+                        <button
+                          type="button"
+                          disabled={submitting || step !== 'account'}
+                          onClick={() => selectAccount(entry)}
+                          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-muted disabled:opacity-50"
+                        >
+                          <UserAvatar uid={entry.user.id} iconUrl={entry.user.image} size={36} />
+                          <span className="min-w-0">
+                            <span className="block truncate font-medium">{entry.user.name}</span>
+                            <span className="block truncate text-xs text-muted-foreground">{entry.user.email}</span>
+                          </span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-              </SlideStep>
+              </div>
+            </SlideStep>
 
-              <SlideStep aria-hidden={step !== 'consent'}>
-                <div>
-                  <button
-                    type="button"
-                    disabled={submitting || step !== 'consent'}
-                    onClick={() => setStep('account')}
-                    className="flex max-w-full items-center gap-1 rounded-full py-1 pr-3 pl-1 text-sm text-muted-foreground transition-colors hover:bg-muted disabled:opacity-50"
-                  >
-                    <ChevronLeft className="h-4 w-4 shrink-0" />
-                    <span className="truncate">{chosen?.user.email}</span>
-                  </button>
+            <SlideStep aria-hidden={step !== 'consent'}>
+              <div className="flex h-full flex-col">
+                <button
+                  type="button"
+                  disabled={submitting || step !== 'consent'}
+                  onClick={() => setStep('account')}
+                  className="flex max-w-full items-center gap-1 self-start rounded-full py-1 pr-3 pl-1 text-sm text-muted-foreground transition-colors hover:bg-muted disabled:opacity-50"
+                >
+                  <ChevronLeft className="h-4 w-4 shrink-0" />
+                  <span className="truncate">{chosen?.user.email}</span>
+                </button>
 
-                  <h1 className="mt-2 text-lg font-semibold">{t('oauthConsent.title')}</h1>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {t('oauthConsent.description', { name: client?.client_name ?? clientId ?? '' })}
-                  </p>
-
-                  {scopes.length > 0 && (
-                    <ul className="mt-4 list-disc space-y-1 pl-5 text-sm">
-                      {scopes.map((s) => (
-                        <li key={s}>{s}</li>
-                      ))}
-                    </ul>
+                <div className="mt-6 flex items-center justify-center gap-4" aria-hidden>
+                  {chosen ? (
+                    <span className="rounded-full ring-1 ring-foreground/10">
+                      <UserAvatar uid={chosen.user.id} iconUrl={chosen.user.image} size={48} />
+                    </span>
+                  ) : (
+                    <span className="flex h-12 w-12 items-center justify-center rounded-full bg-muted ring-1 ring-foreground/10" />
                   )}
-
-                  <div className="mt-6 flex gap-2">
-                    <Button
-                      variant="outline"
-                      className="flex-1"
-                      disabled={submitting || step !== 'consent' || !chosen}
-                      onClick={() => void respond(false)}
-                    >
-                      {t('oauthConsent.deny')}
-                    </Button>
-                    <Button className="flex-1" disabled={submitting || step !== 'consent' || !chosen} onClick={() => void respond(true)}>
-                      {t('oauthConsent.connect')}
-                    </Button>
-                  </div>
+                  <Link2 className="h-5 w-5 shrink-0 text-muted-foreground" />
+                  {client?.logo_uri ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={client.logo_uri} alt="" className="h-12 w-12 rounded-full object-cover ring-1 ring-foreground/10" />
+                  ) : (
+                    <span className="flex h-12 w-12 items-center justify-center rounded-full bg-muted ring-1 ring-foreground/10">
+                      <CircleQuestionMark className="h-6 w-6 text-muted-foreground" />
+                    </span>
+                  )}
                 </div>
-              </SlideStep>
-            </SlideSteps>
-          )}
-        </div>
+
+                <h1 className="mt-5 text-center text-lg font-semibold">{t('oauthConsent.title')}</h1>
+                <p className="mt-1 text-center text-sm text-muted-foreground">
+                  {t('oauthConsent.description', { name: client?.client_name ?? clientId ?? '' })}
+                </p>
+
+                {scopes.length > 0 && (
+                  <ul className="mt-6 space-y-2.5">
+                    {scopes.map((s) => {
+                      const key = `oauthConsent.scopes.${s}`;
+                      return (
+                        <li key={s} className="flex items-start gap-2.5">
+                          <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                          <span>{t.has(key) ? t(key) : s}</span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+
+                <div className="mt-auto flex flex-col gap-2 pt-8">
+                  <Button className="w-full" disabled={submitting || step !== 'consent' || !chosen} onClick={() => void respond(true)}>
+                    {t('oauthConsent.approve')}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    disabled={submitting || step !== 'consent' || !chosen}
+                    onClick={() => void respond(false)}
+                  >
+                    {t('oauthConsent.deny')}
+                  </Button>
+                </div>
+              </div>
+            </SlideStep>
+          </SlideSteps>
+        )}
       </div>
     </div>
   );
