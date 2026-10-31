@@ -187,19 +187,17 @@ function ConsentContent() {
                 </button>
 
                 <div className="mt-6 flex items-center justify-center gap-4" aria-hidden>
-                  {chosen ? (
-                    <span className="rounded-full ring-1 ring-foreground/10">
-                      <UserAvatar uid={chosen.user.id} iconUrl={chosen.user.image} size={48} />
-                    </span>
-                  ) : (
-                    <span className="flex h-12 w-12 items-center justify-center rounded-full bg-muted ring-1 ring-foreground/10" />
-                  )}
+                  <span className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full ring-1 ring-foreground/10">
+                    {chosen ? <UserAvatar uid={chosen.user.id} iconUrl={chosen.user.image} size={48} /> : null}
+                  </span>
                   <Link2 className="h-5 w-5 shrink-0 text-muted-foreground" />
                   {client?.logo_uri ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={client.logo_uri} alt="" className="h-12 w-12 rounded-full object-cover ring-1 ring-foreground/10" />
+                    <span className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full ring-1 ring-foreground/10">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={client.logo_uri} alt="" className="h-full w-full object-cover" />
+                    </span>
                   ) : (
-                    <span className="flex h-12 w-12 items-center justify-center rounded-full bg-muted ring-1 ring-foreground/10">
+                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-muted ring-1 ring-foreground/10">
                       <CircleQuestionMark className="h-6 w-6 text-muted-foreground" />
                     </span>
                   )}
