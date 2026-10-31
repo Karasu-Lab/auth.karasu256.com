@@ -7,7 +7,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t('oauthConsent.title') };
 }
 
-/** Consent screen for `oauthProvider`'s `/oauth2/authorize` flow — see `apps/accounts/src/lib/auth/server.ts`'s `consentPage` option. */
+/** Consent screen for the OAuth provider's `/oauth2/authorize` flow — see api-auth's `oauthProvider` `consentPage` option. */
 export default function ConsentPage() {
   return (
     <main className="flex flex-1 items-center justify-center p-4">
