@@ -9,9 +9,6 @@
     "start": "next start",
     "lint": "eslint",
     "test:e2e": "playwright test",
-    "build:worker": "opennextjs-cloudflare build",
-    "deploy:worker": "opennextjs-cloudflare build && wrangler deploy",
-    "preview:worker": "opennextjs-cloudflare build && wrangler preview",
     "test": "vitest run"
   },
   "dependencies": {
