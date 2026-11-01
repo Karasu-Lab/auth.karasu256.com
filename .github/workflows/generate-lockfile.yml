@@ -1,0 +1,38 @@
+name: Generate pnpm-lock.yaml
+
+# Regenerates this repository's own pnpm-lock.yaml on the dispatched
+# branch and commits it back. Run this after changing dependencies in
+# package.json: deployment installs with --frozen-lockfile, and the
+# published @karasu-lab/* packages can only be resolved with this
+# repository's Actions token, so the lockfile is maintained here rather
+# than on a developer machine.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: read
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Check out this repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+      - name: Regenerate the lockfile
+        run: pnpm install --lockfile-only
+      - name: Commit the lockfile
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add pnpm-lock.yaml
+          git diff --cached --quiet || git commit -m "chore: regenerate pnpm-lock.yaml"
+          git push

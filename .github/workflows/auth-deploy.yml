@@ -5,6 +5,12 @@ on:
     branches: ["**"]
   workflow_dispatch:
 
+# This app deploys standalone, from this repository alone: dependencies
+# come from the published @karasu-lab/* packages (see .npmrc and this
+# app's own pnpm-workspace.yaml) and are pinned by this repository's own
+# pnpm-lock.yaml, so no hub workspace is assembled and no other
+# repository's lockfile can break this deployment.
+
 jobs:
   deploy:
     if: github.ref_name == 'main'
@@ -12,22 +18,36 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      packages: read
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
       NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - name: Deploy the worker
-        uses: Karasu-Lab/Workers/deploy-worker@v1
+      - name: Check out this repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          mode: production
-          hub-repo: Karasu-Lab/Karasu-Lab
-          app-path: apps/auth.karasu256.com
-          prepare-command: node {app_path}/scripts/export-public-vars.mjs {env}
-          build-command: pnpm --filter auth.karasu256.com build:worker
-          deploy-command: pnpm --filter auth.karasu256.com exec wrangler deploy
-          preview-command: pnpm --filter auth.karasu256.com exec wrangler preview --name "{branch}"
-          worker-name: auth-karasu256-com
+          node-version: 24
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Export the public variables for production
+        run: node scripts/export-public-vars.mjs production
+      - name: Build the worker
+        run: pnpm build:worker
+      - name: Deploy to production
+        run: pnpm exec wrangler deploy
+      - name: Prune old Previews
+        env:
+          WORKER_NAME: auth-karasu256-com
+          KEEP: "5"
+          CURRENT_BRANCH: ${{ github.ref_name }}
+          APP_DIR: .
+        run: node scripts/prune-previews.mjs
 
   preview:
     if: github.ref_name != 'main'
@@ -35,19 +55,33 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      packages: read
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
       NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
+      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - name: Deploy the worker
-        uses: Karasu-Lab/Workers/deploy-worker@v1
+      - name: Check out this repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          mode: preview
-          hub-repo: Karasu-Lab/Karasu-Lab
-          app-path: apps/auth.karasu256.com
-          prepare-command: node {app_path}/scripts/export-public-vars.mjs {env}
-          build-command: pnpm --filter auth.karasu256.com build:worker
-          deploy-command: pnpm --filter auth.karasu256.com exec wrangler deploy
-          preview-command: pnpm --filter auth.karasu256.com exec wrangler preview --name "{branch}"
-          worker-name: auth-karasu256-com
+          node-version: 24
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Export the public variables for the preview
+        run: node scripts/export-public-vars.mjs preview
+      - name: Build the worker
+        run: pnpm build:worker
+      - name: Deploy the branch Preview
+        run: pnpm exec wrangler preview --name "${{ github.ref_name }}"
+      - name: Prune old Previews
+        env:
+          WORKER_NAME: auth-karasu256-com
+          KEEP: "5"
+          CURRENT_BRANCH: ${{ github.ref_name }}
+          APP_DIR: .
+        run: node scripts/prune-previews.mjs
