@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 import { Spinner, toast } from '@karasu-lab/ui';
 import { buildUriWithNext } from '@karasu-lab/sdk/uri';
 import { useSdk } from '@/lib/auth/client';
+import { isDeviceSessionConflict } from '@/lib/device-session-conflict';
 import { socialProviders } from './provider-definitions';
 
 export interface ProviderButtonsProps {
@@ -49,7 +50,7 @@ export function ProviderButtons({ continueTo, onSignedIn, disabled = false }: Pr
     setLoading('passkey');
     const result = await authClient.signIn.passkey();
     if (result?.error) {
-      toast.error(result.error.message ?? t('passkey.error.unknown'));
+      toast.error(isDeviceSessionConflict(result.error) ? t('signIn.error.accountAlreadySignedIn') : (result.error.message ?? t('passkey.error.unknown')));
       setLoading(null);
       return;
     }

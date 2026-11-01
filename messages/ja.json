@@ -43,7 +43,8 @@
       "passkeyFailed": "パスキーでのサインインに失敗しました。もう一度お試しください",
       "passkeyMismatch": "入力したメールアドレスとは別のアカウントのパスキーが使われました",
       "rateLimitedWithin": "レート制限に達しました。{minutes}分以内にもう一度お試しください",
-      "rateLimitedLessThan": "レート制限に達しました。{minutes}分未満にもう一度お試しください"
+      "rateLimitedLessThan": "レート制限に達しました。{minutes}分未満にもう一度お試しください",
+      "accountAlreadySignedIn": "このアカウントは既にこのデバイスでサインインしています"
     },
     "next": "次へ",
     "passwordTitle": "パスワードを入力",
@@ -252,6 +253,7 @@
     "title": "サインインに失敗しました",
     "message": "アカウントの認証中にエラーが発生しました。もう一度お試しください。",
     "account_not_linked": "このアカウントはまだ連携されていません。メール/パスワードでサインインしてから設定画面で連携してください。",
+    "account_already_signed_in": "このアカウントは既にこのデバイスでサインインしています。",
     "user_not_found": "このアカウントは存在しません。別の方法でサインインしてください。",
     "backToSignIn": "サインインに戻る",
     "signup_disabled": "このプロバイダーはまだ連携されていません。メール/パスワードでサインインしてから設定画面で連携してください。"
