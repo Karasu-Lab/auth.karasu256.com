@@ -1,14 +1,19 @@
 name: Generate pnpm-lock.yaml
 
-# Regenerates this repository's own pnpm-lock.yaml on the dispatched
-# branch and commits it back. Run this after changing dependencies in
-# package.json: deployment installs with --frozen-lockfile, and the
-# published @karasu-lab/* packages can only be resolved with this
-# repository's Actions token, so the lockfile is maintained here rather
-# than on a developer machine.
+# Regenerates this repository's own pnpm-lock.yaml on the branch and
+# commits it back. It runs when package.json changes on a branch (so a
+# dependency change carries its lockfile with it) and can also be run
+# manually once it exists on the default branch. Deployment installs
+# with --frozen-lockfile, and the published @karasu-lab/* packages can
+# only be resolved with this repository's Actions token, so the
+# lockfile is maintained here rather than on a developer machine.
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - "package.json"
+      - ".github/workflows/generate-lockfile.yml"
 
 jobs:
   generate:
