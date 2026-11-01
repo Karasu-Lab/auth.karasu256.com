@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { LoadingView } from '@karasu-lab/ui';
-import { sdk } from '@/lib/auth/client';
+import { useSdk } from '@/lib/auth/client';
 
 export interface OAuthCallbackClientProps {
   redirectTo: string;
@@ -18,6 +18,7 @@ export interface OAuthCallbackClientProps {
  * On failure, redirects to /oauth/error.
  */
 export function OAuthCallbackClient({ redirectTo }: OAuthCallbackClientProps) {
+  const { sdk } = useSdk();
   const t = useTranslations();
 
   useEffect(() => {

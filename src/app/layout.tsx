@@ -8,8 +8,17 @@ import { Toaster } from '@karasu-lab/ui';
 import { geistSans, geistMono, notoSansJP } from '@karasu-lab/ui/fonts';
 import { FeatureFlagsProvider } from '@karasu-lab/flags/server';
 import { appFlags, appFlagsSchema } from '@/lib/flags';
+import { SdkProvider } from '@/lib/auth/client';
+import { getClientConfig } from '@/lib/auth/client-config';
 
 config.autoAddCss = false;
+
+// The root layout reads the deployment's configuration from the
+// server's environment (see lib/auth/client-config) and hands it to
+// the client tree, so every page renders per request from the
+// server's current environment rather than from values baked in at
+// build time.
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
@@ -54,7 +63,9 @@ export default async function RootLayout({
     <html lang={locale} className={`${geistSans.variable} ${geistMono.variable} ${notoSansJP.variable} h-full`}>
       <body className="min-h-full flex flex-col bg-background text-foreground antialiased">
         <FeatureFlagsProvider flags={appFlags} schema={appFlagsSchema}>
-          <NextIntlClientProvider messages={messages}>{children}</NextIntlClientProvider>
+          <NextIntlClientProvider messages={messages}>
+            <SdkProvider config={getClientConfig()}>{children}</SdkProvider>
+          </NextIntlClientProvider>
           <Toaster />
         </FeatureFlagsProvider>
       </body>

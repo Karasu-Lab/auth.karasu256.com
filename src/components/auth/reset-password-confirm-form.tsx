@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faKey } from '@fortawesome/free-solid-svg-icons';
 import { useTranslations } from 'next-intl';
 import { toast } from '@karasu-lab/ui';
-import { authClient } from '@/lib/auth/client';
+import { useSdk } from '@/lib/auth/client';
 import { Button } from '@karasu-lab/ui';
 import { Card, CardContent, CardHeader, CardTitle } from '@karasu-lab/ui';
 import { Input } from '@karasu-lab/ui';
@@ -18,6 +18,9 @@ interface Props {
 
 /** Lets the user set a new password using the one-time token from the reset email link. */
 export function ResetPasswordConfirmForm({ token }: Props) {
+  const {
+    sdk: { authClient },
+  } = useSdk();
   const t = useTranslations();
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);

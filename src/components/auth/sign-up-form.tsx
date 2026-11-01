@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserPlus } from '@fortawesome/free-solid-svg-icons';
 import { useTranslations } from 'next-intl';
 import { toast } from '@karasu-lab/ui';
-import { authClient } from '@/lib/auth/client';
+import { useSdk } from '@/lib/auth/client';
 import { Button, Checkbox, Input, Label, PasswordInput, Turnstile, type TurnstileHandle } from '@karasu-lab/ui';
 import { LocalizedPasswordStrengthIndicator } from './localized-password-strength-indicator';
 
@@ -20,6 +20,10 @@ export interface SignUpFormProps {
  */
 export function SignUpForm({ continueTo }: SignUpFormProps) {
   const t = useTranslations();
+  const {
+    sdk: { authClient },
+    config,
+  } = useSdk();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [agreedToTerms, setAgreedToTerms] = useState(false);
@@ -27,12 +31,12 @@ export function SignUpForm({ continueTo }: SignUpFormProps) {
 
   // Bot verification: while a site key is configured, registration
   // waits for the widget's single-use token and carries it along.
-  const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+  const turnstileSiteKey = config.turnstileSiteKey;
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const turnstileRef = useRef<TurnstileHandle>(null);
 
   const registerDisabled = loading || !email || !password || !agreedToTerms || (Boolean(turnstileSiteKey) && !turnstileToken);
-  const termsUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? ''}/terms`;
+  const termsUrl = `${config.appUrl ?? ''}/terms`;
 
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault();

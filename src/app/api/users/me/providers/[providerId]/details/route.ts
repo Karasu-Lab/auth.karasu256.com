@@ -30,7 +30,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ pro
   const { providerId } = await params;
   const cookie = (await headers()).get('cookie');
 
-  const base = (process.env.NEXT_PUBLIC_AUTH_API_URL ?? '').replace(/\/+$/, '');
+  const base = (process.env.AUTH_API_URL ?? '').replace(/\/+$/, '');
   const res = await fetch(`${base}/api/users/me/providers/${encodeURIComponent(providerId)}/details`, {
     headers: {
       ...(cookie ? { cookie } : {}),

@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelope, faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { useTranslations } from 'next-intl';
 import { toast } from '@karasu-lab/ui';
-import { authClient } from '@/lib/auth/client';
+import { useSdk } from '@/lib/auth/client';
 import { Button } from '@karasu-lab/ui';
 import { Card, CardContent, CardHeader, CardTitle } from '@karasu-lab/ui';
 import { Input } from '@karasu-lab/ui';
@@ -17,6 +17,9 @@ import { Label } from '@karasu-lab/ui';
  * confirmation message once the server accepts the request.
  */
 export function ResetPasswordForm() {
+  const {
+    sdk: { authClient },
+  } = useSdk();
   const t = useTranslations();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);

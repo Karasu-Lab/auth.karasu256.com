@@ -60,7 +60,7 @@ describe('provider profile API', () => {
     /* This app signs with its own value, which does not match the key
        api-auth holds — the reported production condition. */
     vi.stubEnv('INTERNAL_API_SECRET', 'auth-app-side-key');
-    vi.stubEnv('NEXT_PUBLIC_AUTH_API_URL', 'https://api-auth.karasu256.com');
+    vi.stubEnv('AUTH_API_URL', 'https://api-auth.karasu256.com');
     vi.stubGlobal('fetch', vi.fn(createApiAuthStub('api-auth-side-key', { github: githubProfile })));
   });
 

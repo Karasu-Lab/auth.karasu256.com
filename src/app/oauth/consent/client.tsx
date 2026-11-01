@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { Check, ChevronLeft, CircleQuestionMark, Link2, LoaderCircle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Button, SlideStep, SlideSteps, UserAvatar, toast } from '@karasu-lab/ui';
-import { authClient } from '@/lib/auth/client';
+import { useSdk } from '@/lib/auth/client';
 
 interface PublicClient {
   client_id: string;
@@ -52,6 +52,9 @@ function ProgressBar({ active }: { active: boolean }) {
  * server returns; denying records a refusal the same way.
  */
 function ConsentContent() {
+  const {
+    sdk: { authClient },
+  } = useSdk();
   const t = useTranslations();
   const searchParams = useSearchParams();
   const clientId = searchParams.get('client_id');

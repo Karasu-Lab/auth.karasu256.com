@@ -33,8 +33,8 @@ export type SignInLookupResult =
  * route it: to the domain's identity provider, to the passkey step, to the
  * password step, or to an inline "no account" or "rate limited" error.
  */
-export async function lookupSignIn(email: string): Promise<SignInLookupResult> {
-  const base = (process.env.NEXT_PUBLIC_AUTH_API_URL ?? '').replace(/\/+$/, '');
+export async function lookupSignIn(authApiUrl: string, email: string): Promise<SignInLookupResult> {
+  const base = authApiUrl.replace(/\/+$/, '');
   const res = await fetch(`${base}/api/sign-in/lookup?email=${encodeURIComponent(email)}`);
 
   if (res.status === 404) return { status: 'not_found' };
