@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { LoadingView } from '@karasu-lab/ui';
-import { authClient } from '@/lib/auth/client';
+import { useSdk } from '@/lib/auth/client';
 
 export interface SignOutClientProps {
   next: string;
@@ -11,6 +11,9 @@ export interface SignOutClientProps {
 
 /** Clears the better-auth session, then navigates to the already-validated `next` URL. */
 export function SignOutClient({ next }: SignOutClientProps) {
+  const {
+    sdk: { authClient },
+  } = useSdk();
   const t = useTranslations();
 
   useEffect(() => {

@@ -6,7 +6,7 @@ import { faFingerprint } from '@fortawesome/free-solid-svg-icons';
 import { useTranslations } from 'next-intl';
 import { Spinner, toast } from '@karasu-lab/ui';
 import { buildUriWithNext } from '@karasu-lab/sdk/uri';
-import { authClient } from '@/lib/auth/client';
+import { useSdk } from '@/lib/auth/client';
 import { socialProviders } from './provider-definitions';
 
 export interface ProviderButtonsProps {
@@ -27,6 +27,9 @@ export interface ProviderButtonsProps {
  * button runs a discoverable-credential ceremony.
  */
 export function ProviderButtons({ continueTo, onSignedIn, disabled = false }: ProviderButtonsProps) {
+  const {
+    sdk: { authClient },
+  } = useSdk();
   const t = useTranslations();
   const [loading, setLoading] = useState<string | null>(null);
 

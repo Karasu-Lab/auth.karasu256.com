@@ -10,7 +10,7 @@ function first(value: string | string[] | undefined): string | undefined {
 }
 
 export function getDefaultRedirectTo(): string {
-  return `${process.env.NEXT_PUBLIC_ACCOUNTS_URL ?? ''}/settings`;
+  return `${process.env.ACCOUNTS_URL ?? ''}/settings`;
 }
 
 export function getRedirectTo(raw: string | string[] | undefined): string {
@@ -24,7 +24,7 @@ export function getContinueTo(searchParams: SearchParams): string {
       const v = first(value);
       if (v !== undefined && !OAUTH_SIGNATURE_PARAMS.includes(key)) params.set(key, v);
     }
-    return `${process.env.NEXT_PUBLIC_AUTH_API_URL ?? ''}/api/auth/oauth2/authorize?${params.toString()}`;
+    return `${process.env.AUTH_API_URL ?? ''}/api/auth/oauth2/authorize?${params.toString()}`;
   }
   return getRedirectTo(searchParams.next);
 }
