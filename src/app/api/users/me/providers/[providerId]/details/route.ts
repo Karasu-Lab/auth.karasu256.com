@@ -1,6 +1,6 @@
 import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
-import { buildSignedAuthRequest, sendSignedAuthRequest } from '@/lib/auth/remote';
+import { vercelProtectionBypassHeaders } from '@karasu-lab/utils/server';
 
 /**
  * Returns the signed-in user's profile for one linked provider.
@@ -17,16 +17,27 @@ import { buildSignedAuthRequest, sendSignedAuthRequest } from '@/lib/auth/remote
  * data store of their own.
  *
  * This app holds no provider data itself: the request is forwarded,
- * signed and with the session cookie, to the same endpoint on
- * api-auth, which alone can decrypt the stored provider tokens and
- * which performs the session validation.
+ * with the session cookie, to the same endpoint on api-auth, which
+ * alone can decrypt the stored provider tokens and which performs the
+ * session validation. The forward is deliberately not signed: the
+ * endpoint authenticates by the session cookie itself, and signing
+ * would make this read depend on the two deployments' shared-secret
+ * configuration staying in sync, whose mismatch silently degraded
+ * every provider to "not linked" (the auth API's signature gate
+ * answers 401 to a signed request that does not verify).
  */
 export async function GET(_request: Request, { params }: { params: Promise<{ providerId: string }> }) {
   const { providerId } = await params;
   const cookie = (await headers()).get('cookie');
 
-  const signedRequest = buildSignedAuthRequest(`/api/users/me/providers/${encodeURIComponent(providerId)}/details`, { cookie });
-  const res = await sendSignedAuthRequest(signedRequest).catch(() => null);
+  const base = (process.env.NEXT_PUBLIC_AUTH_API_URL ?? '').replace(/\/+$/, '');
+  const res = await fetch(`${base}/api/users/me/providers/${encodeURIComponent(providerId)}/details`, {
+    headers: {
+      ...(cookie ? { cookie } : {}),
+      ...vercelProtectionBypassHeaders(process.env.VERCEL_PROTECTION_BYPASS_SECRET),
+    },
+    cache: 'no-store',
+  }).catch(() => null);
   if (!res) {
     return NextResponse.json({ error: 'Upstream request failed' }, { status: 502 });
   }
