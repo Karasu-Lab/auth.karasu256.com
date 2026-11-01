@@ -15,11 +15,6 @@ export interface ProviderDefinition {
  * provider below is part of the definition but is for authorization
  * tests only — it is not part of the social set, so neither sign-in nor
  * the linking screen ever renders it.
- *
- * Microsoft sign-in doubles as the credential for the derived
- * providers below: api-auth exchanges the linked Microsoft account's
- * refresh token for an XboxLive.signin-scoped token, so the same link
- * backs Xbox Live authentication and the Minecraft account connection.
  */
 export const socialProviders: ProviderDefinition[] = [
   { id: 'google', label: 'Google', icon: faGoogle },
@@ -27,16 +22,8 @@ export const socialProviders: ProviderDefinition[] = [
   { id: 'microsoft', label: 'Microsoft', icon: faMicrosoft },
 ];
 
-/**
- * Providers derived from the linked Microsoft account, registered on
- * the user endpoint (`/api/users/me/providers/[providerId]/details`)
- * next to the social providers. They have no OAuth flow or sign-in
- * button of their own: a profile resolves for them exactly when the
- * Microsoft link is present and the Xbox Live chain succeeds — for
- * Minecraft, only when the account owns the game. The linking screen
- * shows the Minecraft entry; its link and unlink actions act on the
- * Microsoft link underneath.
- */
+// Providers resolved from the Xbox link flow in
+// Karasu-Lab/api-auth.karasu256.com, not from a sign-in provider.
 export const derivedProviders: ProviderDefinition[] = [
   { id: 'xbox', label: 'Xbox', icon: faXbox },
   { id: 'minecraft', label: 'Minecraft', icon: faCube },
