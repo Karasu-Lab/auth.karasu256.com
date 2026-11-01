@@ -31,6 +31,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 24
+          registry-url: https://npm.pkg.github.com
+          scope: "@karasu-lab"
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
       - name: Install dependencies
@@ -68,6 +70,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 24
+          registry-url: https://npm.pkg.github.com
+          scope: "@karasu-lab"
       - name: Set up pnpm
         uses: pnpm/action-setup@v4
       - name: Install dependencies
