@@ -10,10 +10,62 @@ on:
 # app's own pnpm-workspace.yaml) and are pinned by this repository's own
 # pnpm-lock.yaml, so no hub workspace is assembled and no other
 # repository's lockfile can break this deployment.
+#
+# The lockfile is maintained inside this same workflow: the lockfile
+# job regenerates and commits it before anything installs, and the
+# deploy jobs then check out the branch again so they always install
+# with the lockfile that matches the branch's package.json. Keeping
+# generation and deployment in one workflow, serialized per branch by
+# the concurrency group below, is what keeps the two from racing —
+# as separate workflows they started from the same push, the deploy
+# installing before the generated lockfile had been committed.
+
+concurrency:
+  group: auth-deploy-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
+  lockfile:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: read
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN || secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Check out this repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://npm.pkg.github.com
+          scope: "@karasu-lab"
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+      - name: Regenerate the lockfile
+        run: pnpm install --lockfile-only
+      - name: Commit the lockfile if it changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add pnpm-lock.yaml
+          if git diff --cached --quiet; then
+            echo "pnpm-lock.yaml is up to date"
+            exit 0
+          fi
+          git commit -m "chore: regenerate pnpm-lock.yaml [skip ci]"
+          for attempt in 1 2 3; do
+            if git push; then
+              exit 0
+            fi
+            git pull --rebase origin "${{ github.ref_name }}"
+          done
+          git push
+
   deploy:
     if: github.ref_name == 'main'
+    needs: lockfile
     environment: production
     runs-on: ubuntu-latest
     permissions:
@@ -27,6 +79,8 @@ jobs:
     steps:
       - name: Check out this repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -53,6 +107,7 @@ jobs:
 
   preview:
     if: github.ref_name != 'main'
+    needs: lockfile
     environment: preview
     runs-on: ubuntu-latest
     permissions:
@@ -66,6 +121,8 @@ jobs:
     steps:
       - name: Check out this repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
