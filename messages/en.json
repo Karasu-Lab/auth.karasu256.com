@@ -43,7 +43,8 @@
       "passkeyFailed": "Passkey sign-in failed. Please try again",
       "passkeyMismatch": "The passkey used belongs to a different account than the email address entered",
       "rateLimitedWithin": "Rate limit reached. Please try again within {minutes} minute(s)",
-      "rateLimitedLessThan": "Rate limit reached. Please try again in less than {minutes} minute(s)"
+      "rateLimitedLessThan": "Rate limit reached. Please try again in less than {minutes} minute(s)",
+      "accountAlreadySignedIn": "This account is already signed in on this device"
     },
     "next": "Next",
     "passwordTitle": "Enter your password",
@@ -252,6 +253,7 @@
     "title": "Sign-in failed",
     "message": "An error occurred while authenticating your account. Please try again.",
     "account_not_linked": "This account is not yet linked. Sign in with email/password first, then connect it from the settings page.",
+    "account_already_signed_in": "This account is already signed in on this device.",
     "user_not_found": "This account no longer exists. Please sign in with a different method.",
     "backToSignIn": "Back to sign in",
     "signup_disabled": "This provider is not linked yet. Sign in with email/password first, then connect it from the settings page."

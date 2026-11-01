@@ -6,6 +6,7 @@ import { ChevronLeft, Fingerprint, KeyRound, LockKeyhole, UserPlus } from 'lucid
 import { useTranslations } from 'next-intl';
 import { Button, Input, Label, PasswordInput, SlideStep, SlideSteps, Turnstile, type TurnstileHandle } from '@karasu-lab/ui';
 import { useSdk } from '@/lib/auth/client';
+import { isDeviceSessionConflict } from '@/lib/device-session-conflict';
 import { lookupSignIn, type SignInLookup } from '@/lib/sign-in-lookup';
 import { ProviderButtons } from './provider-buttons';
 
@@ -115,7 +116,7 @@ export function SignInFlow({ continueTo, forceLogin }: SignInFlowProps) {
             window.location.replace(url);
             return;
           }
-          setEmailError(t('signIn.error.unknown'));
+          setEmailError(isDeviceSessionConflict(error) ? t('signIn.error.accountAlreadySignedIn') : t('signIn.error.unknown'));
         } else if (result.lookup.hasPasskey) {
           // A registered passkey is always asked for before anything else.
           setStep('passkey');
@@ -136,7 +137,7 @@ export function SignInFlow({ continueTo, forceLogin }: SignInFlowProps) {
     setPasskeyError(null);
     const { error } = await authClient.signIn.passkey();
     if (error) {
-      setPasskeyError(t('signIn.error.passkeyFailed'));
+      setPasskeyError(isDeviceSessionConflict(error) ? t('signIn.error.accountAlreadySignedIn') : t('signIn.error.passkeyFailed'));
       setBusy(false);
       return;
     }
@@ -162,7 +163,13 @@ export function SignInFlow({ continueTo, forceLogin }: SignInFlowProps) {
     );
     if (error) {
       turnstileRef.current?.reset();
-      setPasswordError(error.status === 401 ? t('signIn.error.invalidPassword') : t('signIn.error.unknown'));
+      setPasswordError(
+        isDeviceSessionConflict(error)
+          ? t('signIn.error.accountAlreadySignedIn')
+          : error.status === 401
+            ? t('signIn.error.invalidPassword')
+            : t('signIn.error.unknown'),
+      );
       setBusy(false);
       return;
     }

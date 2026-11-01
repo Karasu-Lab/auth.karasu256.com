@@ -43,7 +43,8 @@
       "passkeyFailed": "通行密钥登录失败。请重试",
       "passkeyMismatch": "所使用的通行密钥属于与输入邮箱不同的账号",
       "rateLimitedWithin": "已达到速率限制。请在 {minutes} 分钟内重试",
-      "rateLimitedLessThan": "已达到速率限制。请在不足 {minutes} 分钟后重试"
+      "rateLimitedLessThan": "已达到速率限制。请在不足 {minutes} 分钟后重试",
+      "accountAlreadySignedIn": "此账户已在此设备上登录"
     },
     "next": "下一步",
     "passwordTitle": "输入密码",
@@ -252,6 +253,7 @@
     "title": "登录失败",
     "message": "验证账户时发生错误，请重试。",
     "account_not_linked": "此账户尚未关联。请先通过邮箱/密码登录，然后在设置页面进行关联。",
+    "account_already_signed_in": "此账户已在此设备上登录。",
     "user_not_found": "此账户不存在，请使用其他方式登录。",
     "backToSignIn": "返回登录",
     "signup_disabled": "此提供商尚未关联。请先通过邮箱/密码登录，然后在设置页面进行关联。"
