@@ -1,6 +1,6 @@
 import { vercelAdapter } from '@flags-sdk/vercel';
 import { z } from 'zod';
-import { createSchemaFlags } from '@karasu-lab/flags/server';
+import { createSchemaFlags } from '@karasu-lab/flags-sdk/server';
 
 export const appFlagsSchema = z.object({
   testFlag: z.boolean(),

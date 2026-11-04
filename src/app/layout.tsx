@@ -6,7 +6,7 @@ import { getLocale, getMessages, getTranslations } from 'next-intl/server';
 import './globals.css';
 import { Toaster } from '@karasu-lab/ui';
 import { geistSans, geistMono, notoSansJP } from '@karasu-lab/ui/fonts';
-import { FeatureFlagsProvider } from '@karasu-lab/flags/server';
+import { FeatureFlagsProvider } from '@karasu-lab/flags-sdk/server';
 import { appFlags, appFlagsSchema } from '@/lib/flags';
 import { SdkProvider } from '@/lib/auth/client';
 import { getClientConfig } from '@/lib/auth/client-config';
