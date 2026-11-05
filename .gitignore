@@ -36,3 +36,6 @@ drizzle/*
 # OpenNext / Wrangler
 .open-next/
 .wrangler/
+
+# Turborepo
+.turbo/
