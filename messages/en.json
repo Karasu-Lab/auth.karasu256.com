@@ -299,6 +299,16 @@
       "write:profile": "Update your profile"
     }
   },
+  "device": {
+    "title": "Authorize a device",
+    "description": "Enter the code shown on the device that is trying to sign in.",
+    "codeLabel": "Device code",
+    "verify": "Continue",
+    "requesting": "{name} is requesting to sign in on this device.",
+    "done": "Device authorized. You can close this page.",
+    "denied": "Device authorization was denied.",
+    "invalidCode": "The code is invalid. Check the code and try again."
+  },
   "oauth": {
     "testCallback": {
       "title": "Test callback"
