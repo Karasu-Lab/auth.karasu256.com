@@ -299,6 +299,16 @@
       "write:profile": "更新个人资料"
     }
   },
+  "device": {
+    "title": "授权设备",
+    "description": "请输入要登录的设备上显示的代码。",
+    "codeLabel": "设备代码",
+    "verify": "继续",
+    "requesting": "{name} 正在请求在此设备上登录。",
+    "done": "设备已授权。您可以关闭此页面。",
+    "denied": "已拒绝设备授权。",
+    "invalidCode": "代码无效。请检查后重试。"
+  },
   "oauth": {
     "testCallback": {
       "title": "测试回调"
