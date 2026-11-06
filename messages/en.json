@@ -304,9 +304,9 @@
         "profile": "Update your profile"
       },
       "read:github": {
-        "user": "Read your GitHub user information",
-        "avatar": "Read your GitHub icon",
-        "repositories": "Read your GitHub repositories"
+        "user": "Read your user information",
+        "avatar": "Read your icon",
+        "repositories": "Read your repositories"
       }
     }
   },

@@ -304,9 +304,9 @@
         "profile": "更新个人资料"
       },
       "read:github": {
-        "user": "读取您的 GitHub 用户信息",
-        "avatar": "读取您的 GitHub 图标",
-        "repositories": "读取您的 GitHub 仓库列表"
+        "user": "读取您的用户信息",
+        "avatar": "读取您的图标",
+        "repositories": "读取您的仓库列表"
       }
     }
   },
