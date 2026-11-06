@@ -308,6 +308,10 @@
         "avatar": "アイコンを読み取る",
         "repositories": "リポジトリ一覧を読み取る"
       }
+    },
+    "operations": {
+      "users": "ユーザー",
+      "github": "GitHub"
     }
   },
   "device": {

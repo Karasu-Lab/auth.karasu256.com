@@ -308,6 +308,10 @@
         "avatar": "读取您的图标",
         "repositories": "读取您的仓库列表"
       }
+    },
+    "operations": {
+      "users": "用户",
+      "github": "GitHub"
     }
   },
   "device": {

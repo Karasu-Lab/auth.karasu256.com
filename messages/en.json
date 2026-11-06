@@ -308,6 +308,10 @@
         "avatar": "Read your icon",
         "repositories": "Read your repositories"
       }
+    },
+    "operations": {
+      "users": "Users",
+      "github": "GitHub"
     }
   },
   "device": {

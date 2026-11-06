@@ -2,9 +2,10 @@
 
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Check, ChevronLeft, CircleQuestionMark, Link2, LoaderCircle } from 'lucide-react';
+import { ChevronLeft, CircleQuestionMark, Link2, LoaderCircle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Button, SlideStep, SlideSteps, UserAvatar, toast } from '@karasu-lab/ui';
+import { ScopeList } from '@/components/auth/scope-list';
 import { useSdk } from '@/lib/auth/client';
 
 interface PublicClient {
@@ -189,19 +190,7 @@ function ConsentContent() {
 
                 <div className="mt-6">
                   <p className="text-sm">{t('oauthConsent.description', { name: client?.client_name ?? clientId ?? '' })}</p>
-                  {scopes.length > 0 && (
-                    <ul className="mt-3 space-y-2.5">
-                      {scopes.map((s) => {
-                        const key = `oauthConsent.scopes.${s}`;
-                        return (
-                          <li key={s} className="flex items-start gap-2.5">
-                            <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                            <span>{t.has(key) ? t(key) : s}</span>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  )}
+                  {scopes.length > 0 && <ScopeList scopes={scopes} />}
                 </div>
 
                 <div className="mt-auto flex flex-col gap-2 pt-8">
