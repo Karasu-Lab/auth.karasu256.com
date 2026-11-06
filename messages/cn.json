@@ -296,7 +296,12 @@
       "email": "读取您的电子邮箱地址",
       "offline_access": "离线访问",
       "read:profile": "读取个人资料",
-      "write:profile": "更新个人资料"
+      "write:profile": "更新个人资料",
+      "read:users.profile": "读取个人资料",
+      "write:users.profile": "更新个人资料",
+      "read:github.user": "读取您的 GitHub 用户信息",
+      "read:github.avatar": "读取您的 GitHub 图标",
+      "read:github.repositories": "读取您的 GitHub 仓库列表"
     }
   },
   "device": {
