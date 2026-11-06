@@ -304,10 +304,14 @@
         "profile": "プロフィールを更新する"
       },
       "read:github": {
-        "user": "GitHub のユーザー情報を読み取る",
-        "avatar": "GitHub のアイコンを読み取る",
-        "repositories": "GitHub のリポジトリ一覧を読み取る"
+        "user": "ユーザー情報を読み取る",
+        "avatar": "アイコンを読み取る",
+        "repositories": "リポジトリ一覧を読み取る"
       }
+    },
+    "operations": {
+      "users": "ユーザー",
+      "github": "GitHub"
     }
   },
   "device": {
