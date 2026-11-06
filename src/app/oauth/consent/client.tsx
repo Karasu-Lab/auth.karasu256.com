@@ -20,10 +20,8 @@ interface DeviceSessionEntry {
 
 type Step = 'account' | 'consent';
 
-/** The sliding panels, in order: account selection, then the connection itself. */
 const STEPS: readonly Step[] = ['account', 'consent'];
 
-/** Indeterminate bar pinned to the top edge of the container while a step is working. */
 function ProgressBar({ active }: { active: boolean }) {
   return (
     <div
@@ -35,22 +33,6 @@ function ProgressBar({ active }: { active: boolean }) {
   );
 }
 
-/**
- * Consent screen for the OAuth provider's authorization flow. The flow is
- * account selection, then authorization: the first step is an account
- * chooser listing the device sessions already signed in on this device
- * (multi-session), and picking one slides to the consent step. The
- * consent step is composed, from the top, of a row holding the user's
- * icon, a connection icon, and the destination app's icon (a question
- * mark placeholder when the client has no logo); a scopes container
- * made of the line naming the app as requesting the following
- * permissions and the vertical list of those scopes, translated on the
- * client; and, pinned to the
- * bottom, the approve and deny buttons stacked vertically. Approving
- * activates the chosen account when it is not the active session,
- * records the consent, and redirects to the URL the authorization
- * server returns; denying records a refusal the same way.
- */
 function ConsentContent() {
   const {
     sdk: { authClient },
@@ -84,24 +66,25 @@ function ConsentContent() {
     };
   }, []);
 
-  // The authorization flow only reaches this page with a session, so when
-  // the device list is empty (or has not loaded the active entry) the
-  // current session's user is the account to connect.
-  const activeEntry: DeviceSessionEntry | null =
-    sessions?.find((entry) => entry.session.token === sessionData?.session.token) ??
-    (sessionData
-      ? {
-          session: { token: sessionData.session.token },
-          user: {
-            id: sessionData.user.id,
-            name: sessionData.user.name,
-            email: sessionData.user.email,
-            image: sessionData.user.image,
-          },
-        }
-      : null);
+  const activeEntry: DeviceSessionEntry | null = sessionData
+    ? {
+        session: { token: sessionData.session.token },
+        user: {
+          id: sessionData.user.id,
+          name: sessionData.user.name,
+          email: sessionData.user.email,
+          image: sessionData.user.image,
+        },
+      }
+    : null;
   const accounts: DeviceSessionEntry[] | null =
-    sessions === null ? null : sessions.length > 0 ? sessions : activeEntry ? [activeEntry] : [];
+    sessions === null
+      ? null
+      : sessions.length > 0
+        ? sessions.map((entry) => (activeEntry && entry.session.token === activeEntry.session.token ? activeEntry : entry))
+        : activeEntry
+          ? [activeEntry]
+          : [];
   const chosen = selected ?? activeEntry;
 
   function selectAccount(entry: DeviceSessionEntry) {
@@ -113,8 +96,6 @@ function ConsentContent() {
     if (!chosen) return;
     setSubmitting(true);
     try {
-      // Consent is recorded against the active session, so activate the
-      // chosen account first when it is not the active one.
       if (chosen.session.token !== sessionData?.session.token) {
         const { error } = await authClient.multiSession.setActive({ sessionToken: chosen.session.token });
         if (error) {
