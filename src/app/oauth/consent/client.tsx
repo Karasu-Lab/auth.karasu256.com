@@ -20,10 +20,8 @@ interface DeviceSessionEntry {
 
 type Step = 'account' | 'consent';
 
-/** The sliding panels, in order: account selection, then the connection itself. */
 const STEPS: readonly Step[] = ['account', 'consent'];
 
-/** Indeterminate bar pinned to the top edge of the container while a step is working. */
 function ProgressBar({ active }: { active: boolean }) {
   return (
     <div
@@ -35,25 +33,23 @@ function ProgressBar({ active }: { active: boolean }) {
   );
 }
 
-/**
- * Consent screen for the OAuth provider's authorization flow. The flow is
- * account selection, then authorization: the first step is an account
- * chooser listing the device sessions already signed in on this device
- * (multi-session), and picking one slides to the consent step. The
- * consent step is composed, from the top, of a row holding the user's
- * icon, a connection icon, and the destination app's icon (a question
- * mark placeholder when the client has no logo); a scopes container
- * made of the line naming the app as requesting the following
- * permissions and the vertical list of those scopes, translated on the
- * client; and, pinned to the
- * bottom, the approve and deny buttons stacked vertically. Approving
- * activates the chosen account when it is not the active session,
- * records the consent, and redirects to the URL the authorization
- * server returns; denying records a refusal the same way.
- */
+function avatarIconUrl(cdnUrl: string | undefined, user: DeviceSessionEntry['user']): string | null {
+  if (!user.image) return null;
+  if (!cdnUrl) return user.image;
+  let version: string | null = null;
+  try {
+    version = new URL(user.image).searchParams.get('v');
+  } catch {
+    version = null;
+  }
+  const base = `${cdnUrl.replace(/\/+$/, '')}/u/profiles/${user.id}/avatar.png`;
+  return version ? `${base}?v=${encodeURIComponent(version)}` : base;
+}
+
 function ConsentContent() {
   const {
     sdk: { authClient },
+    config,
   } = useSdk();
   const t = useTranslations();
   const searchParams = useSearchParams();
@@ -84,9 +80,6 @@ function ConsentContent() {
     };
   }, []);
 
-  // The authorization flow only reaches this page with a session, so when
-  // the device list is empty (or has not loaded the active entry) the
-  // current session's user is the account to connect.
   const activeEntry: DeviceSessionEntry | null =
     sessions?.find((entry) => entry.session.token === sessionData?.session.token) ??
     (sessionData
@@ -113,8 +106,6 @@ function ConsentContent() {
     if (!chosen) return;
     setSubmitting(true);
     try {
-      // Consent is recorded against the active session, so activate the
-      // chosen account first when it is not the active one.
       if (chosen.session.token !== sessionData?.session.token) {
         const { error } = await authClient.multiSession.setActive({ sessionToken: chosen.session.token });
         if (error) {
@@ -164,7 +155,7 @@ function ConsentContent() {
                           onClick={() => selectAccount(entry)}
                           className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-muted disabled:opacity-50"
                         >
-                          <UserAvatar uid={entry.user.id} iconUrl={entry.user.image} size={36} />
+                          <UserAvatar uid={entry.user.id} iconUrl={avatarIconUrl(config.cdnUrl, entry.user)} size={36} />
                           <span className="min-w-0">
                             <span className="block truncate font-medium">{entry.user.name}</span>
                             <span className="block truncate text-xs text-muted-foreground">{entry.user.email}</span>
@@ -191,7 +182,7 @@ function ConsentContent() {
 
                 <div className="mt-6 flex items-center justify-center gap-4" aria-hidden>
                   <span className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full ring-1 ring-foreground/10">
-                    {chosen ? <UserAvatar uid={chosen.user.id} iconUrl={chosen.user.image} size={48} /> : null}
+                    {chosen ? <UserAvatar uid={chosen.user.id} iconUrl={avatarIconUrl(config.cdnUrl, chosen.user)} size={48} /> : null}
                   </span>
                   <Link2 className="h-5 w-5 shrink-0 text-muted-foreground" />
                   {client?.logo_uri ? (
