@@ -1,6 +1,6 @@
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
-import { getRedirectTo } from '@/lib/redirect-server';
 import { OAuthCallbackClient } from './client';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -8,16 +8,13 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t('authCallback.title') };
 }
 
-interface Props {
-  searchParams: Promise<{ next?: string | string[] }>;
-}
-
 /** Intermediate page shown during the OAuth sign-in redirect flow. */
-export default async function OAuthCallbackPage({ searchParams }: Props) {
-  const { next } = await searchParams;
+export default function OAuthCallbackPage() {
   return (
     <main className="flex flex-1 items-center justify-center p-4">
-      <OAuthCallbackClient redirectTo={getRedirectTo(next)} />
+      <Suspense>
+        <OAuthCallbackClient />
+      </Suspense>
     </main>
   );
 }

@@ -1,31 +1,85 @@
-/**
- * The configuration the server hands to the browser: the hosts the
- * SDK is built against and the Turnstile site key. The host fields
- * carry the same names as the SDK's host configuration input.
- *
- * The server's environment variables are the single source of truth
- * for these values. They are read here, on the server, from the plain
- * (non-`NEXT_PUBLIC_`) variables the deployment provides, and reach
- * the client only as the props of the root layout's provider — the
- * client bundle carries no environment variables of its own, so there
- * is no second, build-time copy that can drift or go missing.
- */
-export interface ClientConfig {
-  authApiUrl?: string;
-  authUrl?: string;
-  accountsUrl?: string;
-  appUrl?: string;
-  /** Cloudflare Turnstile site key for the bot-verification widgets. */
-  turnstileSiteKey?: string;
+import { z } from 'zod';
+
+const TURNSTILE_SITE_KEY = '0x4AAAAAAFsX0TpFOyokXFPm';
+
+interface ClientConfigDefaults {
+  authApiUrl: string;
+  authUrl: string;
+  accountsUrl: string;
+  appUrl: string;
+  trustedOrigins: string[];
 }
 
-/** Reads the client configuration from the server's environment. Server-side only. */
+const PRODUCTION_DEFAULTS: ClientConfigDefaults = {
+  authApiUrl: 'https://api-auth.karasu256.com',
+  authUrl: 'https://auth.karasu256.com',
+  accountsUrl: 'https://accounts.karasu256.com',
+  appUrl: 'https://karasu256.com',
+  trustedOrigins: ['https://accounts.karasu256.com', 'https://auth.karasu256.com', 'https://karasu256.com', 'https://qr.karasu256.com'],
+};
+
+const PREVIEW_DEFAULTS: ClientConfigDefaults = {
+  authApiUrl: 'https://dev-api-auth.karasu256.com',
+  authUrl: 'https://dev-auth.karasu256.com',
+  accountsUrl: 'https://dev.accounts.karasu256.com',
+  appUrl: 'https://dev.karasu256.com',
+  trustedOrigins: [
+    'https://dev.accounts.karasu256.com',
+    'https://dev-auth.karasu256.com',
+    'https://dev.karasu256.com',
+    'https://dev.qr.karasu256.com',
+  ],
+};
+
+const LOCAL_DEFAULTS: ClientConfigDefaults = {
+  authApiUrl: 'http://localhost:8790',
+  authUrl: 'http://localhost:3004',
+  accountsUrl: 'http://localhost:3001',
+  appUrl: 'http://localhost:3000',
+  trustedOrigins: [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:3002',
+    'http://localhost:3004',
+    'https://local.karasu256.com',
+    'https://local-accounts.karasu256.com',
+    'https://local-qr.karasu256.com',
+    'https://local-auth.karasu256.com',
+  ],
+};
+
+function clientConfigSchema(defaults: ClientConfigDefaults) {
+  return z.object({
+    authApiUrl: z.url().default(defaults.authApiUrl),
+    authUrl: z.url().default(defaults.authUrl),
+    accountsUrl: z.url().default(defaults.accountsUrl),
+    appUrl: z.url().default(defaults.appUrl),
+    turnstileSiteKey: z.string().default(TURNSTILE_SITE_KEY),
+    trustedOrigins: z.array(z.url()).default(defaults.trustedOrigins),
+  });
+}
+
+export type ClientConfig = z.infer<ReturnType<typeof clientConfigSchema>>;
+
+/**
+ * Reads the client configuration from the server's environment. Every
+ * field falls back to the default for the current environment
+ * (`APP_ENV`, branched like the cdn worker's constants), so the result
+ * always carries every value the client needs.
+ */
 export function getClientConfig(): ClientConfig {
-  return {
+  const defaults = process.env.APP_ENV === 'preview' ? PREVIEW_DEFAULTS : process.env.APP_ENV === 'local' ? LOCAL_DEFAULTS : PRODUCTION_DEFAULTS;
+
+  return clientConfigSchema(defaults).parse({
     authApiUrl: process.env.AUTH_API_URL,
     authUrl: process.env.AUTH_URL,
     accountsUrl: process.env.ACCOUNTS_URL,
     appUrl: process.env.APP_URL,
     turnstileSiteKey: process.env.TURNSTILE_SITE_KEY,
-  };
+    trustedOrigins: process.env.TRUSTED_ORIGINS
+      ? process.env.TRUSTED_ORIGINS.split(',')
+          .map((origin) => origin.trim())
+          .filter((origin) => origin.length > 0)
+      : undefined,
+  });
 }

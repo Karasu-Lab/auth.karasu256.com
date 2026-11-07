@@ -1,14 +1,11 @@
 import { getRequestConfig } from 'next-intl/server';
-import { cookies } from 'next/headers';
-import { locales, defaultLocale, type Locale } from './locales';
+import { defaultLocale } from './locales';
 
+// Pages are prerendered as static assets, so the locale is not read from
+// the request here; the client provider resolves it from the cookie.
 export default getRequestConfig(async () => {
-  const cookieStore = await cookies();
-  const cookieLocale = cookieStore.get('NEXT_LOCALE')?.value;
-  const locale: Locale = locales.includes(cookieLocale as Locale) ? (cookieLocale as Locale) : defaultLocale;
-
   return {
-    locale,
-    messages: (await import(`../../messages/${locale}.json`)).default,
+    locale: defaultLocale,
+    messages: (await import(`../../messages/${defaultLocale}.json`)).default,
   };
 });

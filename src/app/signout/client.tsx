@@ -1,20 +1,21 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { LoadingView } from '@karasu-lab/ui';
 import { useSdk } from '@/lib/auth/client';
+import { resolveRedirectTo } from '@/lib/redirect';
 
-export interface SignOutClientProps {
-  next: string;
-}
-
-/** Clears the better-auth session, then navigates to the already-validated `next` URL. */
-export function SignOutClient({ next }: SignOutClientProps) {
+/** Clears the better-auth session, then navigates to the `?next` URL validated against the trusted origins. */
+export function SignOutClient() {
+  const searchParams = useSearchParams();
   const {
     sdk: { authClient },
+    config,
   } = useSdk();
   const t = useTranslations();
+  const next = resolveRedirectTo(searchParams.get('next'), config.trustedOrigins, '/sign-in');
 
   useEffect(() => {
     async function performSignOut() {
