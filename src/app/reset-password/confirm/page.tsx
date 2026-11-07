@@ -8,7 +8,6 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t('resetPasswordConfirm.title') };
 }
 
-/** Handles the one-time reset link from the password-reset email. */
 export default function ResetPasswordConfirmPage() {
   return (
     <main className="flex flex-1 items-center justify-center p-4">

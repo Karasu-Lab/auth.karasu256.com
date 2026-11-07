@@ -8,7 +8,6 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t('signIn.title') };
 }
 
-/** Sign-in page for unauthenticated users. */
 export default function SignInPage() {
   return (
     <main className="flex flex-1 items-center justify-center p-4">

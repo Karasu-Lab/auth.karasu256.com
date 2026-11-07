@@ -8,7 +8,6 @@ import { SignUpForm } from '@/components/auth/sign-up-form';
 import { useSdk } from '@/lib/auth/client';
 import { getContinueTo } from '@/lib/redirect';
 
-/** Sign-up page body — resolves the continuation target from the query string on the client. */
 export function SignUpClient() {
   const searchParams = useSearchParams();
   const { config } = useSdk();

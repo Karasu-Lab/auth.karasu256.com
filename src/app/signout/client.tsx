@@ -7,7 +7,6 @@ import { LoadingView } from '@karasu-lab/ui';
 import { useSdk } from '@/lib/auth/client';
 import { resolveRedirectTo } from '@/lib/redirect';
 
-/** Clears the better-auth session, then navigates to the `?next` URL validated against the trusted origins. */
 export function SignOutClient() {
   const searchParams = useSearchParams();
   const {

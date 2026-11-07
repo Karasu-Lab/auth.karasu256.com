@@ -61,12 +61,6 @@ function clientConfigSchema(defaults: ClientConfigDefaults) {
 
 export type ClientConfig = z.infer<ReturnType<typeof clientConfigSchema>>;
 
-/**
- * Reads the client configuration from the server's environment. Every
- * field falls back to the default for the current environment
- * (`APP_ENV`, branched like the cdn worker's constants), so the result
- * always carries every value the client needs.
- */
 export function getClientConfig(): ClientConfig {
   const defaults = process.env.APP_ENV === 'preview' ? PREVIEW_DEFAULTS : process.env.APP_ENV === 'local' ? LOCAL_DEFAULTS : PRODUCTION_DEFAULTS;
 

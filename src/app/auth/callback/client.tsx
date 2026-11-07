@@ -7,15 +7,6 @@ import { LoadingView } from '@karasu-lab/ui';
 import { useSdk } from '@/lib/auth/client';
 import { getRedirectTo } from '@/lib/redirect';
 
-/**
- * better-auth's own OAuth callback redirects here with the session cookie
- * already set (via `nextCookies()`), so this only confirms the session
- * actually landed — through the SDK's JWT exchange, not a session
- * lookup — before continuing to the redirect target validated against
- * the client configuration's trusted origins.
- *
- * On failure, redirects to /oauth/error.
- */
 export function OAuthCallbackClient() {
   const searchParams = useSearchParams();
   const { sdk, config } = useSdk();

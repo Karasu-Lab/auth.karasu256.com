@@ -22,17 +22,15 @@ function readCookieLocale(): Locale {
   return locales.includes(cookieLocale as Locale) ? (cookieLocale as Locale) : defaultLocale;
 }
 
-/** Provides the intl messages, resolving the locale from the `NEXT_LOCALE` cookie on the client. */
 export function LocaleProvider({ children }: { children: ReactNode }) {
   const [locale, setLocale] = useState<Locale>(defaultLocale);
 
   useEffect(() => {
     const cookieLocale = readCookieLocale();
-    if (cookieLocale !== locale) {
+    if (cookieLocale !== defaultLocale) {
       setLocale(cookieLocale);
       document.documentElement.lang = cookieLocale;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

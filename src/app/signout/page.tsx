@@ -8,7 +8,6 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t('signOut.title') };
 }
 
-/** Sign-out page. Clears the better-auth session then redirects to `?next`. */
 export default function SignOutPage() {
   return (
     <main className="flex flex-1 items-center justify-center p-4">

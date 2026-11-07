@@ -8,7 +8,6 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t('signIn.createAccount') };
 }
 
-/** Sign-up page, reached from the link button on the sign-in screen. */
 export default function SignUpPage() {
   return (
     <main className="flex flex-1 items-center justify-center p-4">
