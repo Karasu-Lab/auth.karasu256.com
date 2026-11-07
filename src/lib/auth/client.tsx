@@ -1,15 +1,9 @@
 'use client';
 
-import { createContext, useContext, useMemo, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { createSdk, type SdkInstance } from '@karasu-lab/sdk/client';
 import type { ClientConfig } from './client-config';
 
-/**
- * The browser's view of the app: the SDK instance built from the
- * server-provided configuration, and that configuration itself (for
- * the values components read directly, such as the Turnstile site
- * key). Provided by {@link SdkProvider} in the root layout.
- */
 export interface SdkContextValue {
   sdk: SdkInstance;
   config: ClientConfig;
@@ -17,19 +11,33 @@ export interface SdkContextValue {
 
 const SdkContext = createContext<SdkContextValue | null>(null);
 
-/**
- * Builds the SDK from the configuration the server read from its own
- * environment and hands it to the client tree. The SDK parses the
- * hosts against its zod schema at this point, so a deployment whose
- * server environment is incomplete fails on first render instead of
- * drifting into a half-configured state.
- */
-export function SdkProvider({ config, children }: { config: ClientConfig; children: ReactNode }) {
-  const value = useMemo<SdkContextValue>(() => ({ sdk: createSdk(config), config }), [config]);
+let clientConfigPromise: Promise<ClientConfig> | undefined;
+
+function fetchClientConfig(): Promise<ClientConfig> {
+  clientConfigPromise ??= fetch('/api/client-config').then(async (response) => {
+    if (!response.ok) throw new Error(`Failed to load the client configuration (${response.status})`);
+    return (await response.json()) as ClientConfig;
+  });
+  return clientConfigPromise;
+}
+
+export function SdkProvider({ children }: { children: ReactNode }) {
+  const [value, setValue] = useState<SdkContextValue | null>(null);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    fetchClientConfig()
+      .then((config) => setValue({ sdk: createSdk(config), config }))
+      .catch((err: unknown) => setError(err instanceof Error ? err : new Error(String(err))));
+  }, []);
+
+  if (error) throw error;
+
+  if (!value) return null;
+
   return <SdkContext.Provider value={value}>{children}</SdkContext.Provider>;
 }
 
-/** The SDK instance and client configuration provided by {@link SdkProvider}. */
 export function useSdk(): SdkContextValue {
   const value = useContext(SdkContext);
   if (!value) throw new Error('useSdk must be used within an SdkProvider');
