@@ -23,7 +23,7 @@
     "@fortawesome/react-fontawesome": "^3.3.1",
     "@karasu-lab/flags-sdk": "0.1.0-dab071f",
     "@karasu-lab/sdk": "0.1.0-0fdbfba",
-    "@karasu-lab/types": "0.1.0-5fc5494",
+    "@karasu-lab/types": "0.1.0-1950a9c",
     "@karasu-lab/ui": "0.1.0-df38f4a",
     "@karasu-lab/utils": "0.1.0-be51f04",
     "better-auth": "^1.7.12",
@@ -50,7 +50,7 @@
     "@types/react-dom": "^19",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "wrangler": "^4.155.0",
-    "vitest": "^3.2.7"
+    "vitest": "^3.2.7",
+    "wrangler": "^4.155.0"
   }
 }
