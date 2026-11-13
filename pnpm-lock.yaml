@@ -198,9 +198,9 @@ importers:
       '@fortawesome/react-fontawesome':
         specifier: ^3.3.1
         version: 3.5.0(@fortawesome/fontawesome-svg-core@7.3.1)(react@19.2.4)
-      '@karasu-lab/flags-sdk':
-        specifier: 0.1.0-dab071f
-        version: 0.1.0-dab071f(next@16.2.9(@babel/core@7.29.7(supports-color@10.2.2))(@playwright/test@1.64.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@karasu-lab/flags':
+        specifier: 0.1.0-190fe8c
+        version: 0.1.0-190fe8c(next@16.2.9(@babel/core@7.29.7(supports-color@10.2.2))(@playwright/test@1.64.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@karasu-lab/sdk':
         specifier: 0.1.0-0fdbfba
         version: 0.1.0-0fdbfba(a460ca0b6969acfa12478c3b6685a5a2)
@@ -1453,8 +1453,8 @@ packages:
   '@karasu-lab/api-permissions@0.1.0-4efb331':
     resolution: {integrity: sha512-1BW/uS+dK9bRf9ZrJak+Jgm5CSfESjTCWOAqzVsHDqA2s8fMPbl4JQimAoUU4+aMjp5aYmZGEK0zbYJzDZI+Rg==, tarball: https://npm.pkg.github.com/download/@karasu-lab/api-permissions/0.1.0-4efb331/3505971bbd0ebb3029d0c174ae6f5789b2c8562e}
 
-  '@karasu-lab/flags-sdk@0.1.0-dab071f':
-    resolution: {integrity: sha512-ZiWufhkfKV0DLZXL1lEAkQs6R6Y90UAKIXT/i+2SyrYGGwkpu8EXjMoEiG7hZ9qiF7lq6Nst+fyoHeLLGeimew==, tarball: https://npm.pkg.github.com/download/@karasu-lab/flags-sdk/0.1.0-dab071f/b8aa21bf82c79c82145af04d4ca184c04a60f073}
+  '@karasu-lab/flags@0.1.0-190fe8c':
+    resolution: {integrity: sha512-MPzoJ4lik7vupSbufLDRcaGV2hdcpCida3raa0Bj45Yi0/ekDvpWt1ulhpj2IGlAxXMfesm9FyX8aPSWa3fz+A==, tarball: https://npm.pkg.github.com/download/@karasu-lab/flags/0.1.0-190fe8c/5855413de78bcc7db66f598205e0693059699aad}
     peerDependencies:
       next: ^15.3.9
       react: ^19
@@ -5969,7 +5969,7 @@ snapshots:
 
   '@karasu-lab/api-permissions@0.1.0-4efb331': {}
 
-  '@karasu-lab/flags-sdk@0.1.0-dab071f(next@16.2.9(@babel/core@7.29.7(supports-color@10.2.2))(@playwright/test@1.64.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
+  '@karasu-lab/flags@0.1.0-190fe8c(next@16.2.9(@babel/core@7.29.7(supports-color@10.2.2))(@playwright/test@1.64.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
       flags: 4.4.0(next@16.2.9(@babel/core@7.29.7(supports-color@10.2.2))(@playwright/test@1.64.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       next: 16.2.9(@babel/core@7.29.7(supports-color@10.2.2))(@playwright/test@1.64.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -7126,8 +7126,8 @@ snapshots:
     dependencies:
       humanize-ms: 1.2.1
 
-  ajv-formats@2.1.1(ajv@8.20.0):
-    optionalDependencies:
+  ajv-formats@2.1.1:
+    dependencies:
       ajv: 8.20.0
 
   ajv@8.20.0:
@@ -7353,7 +7353,7 @@ snapshots:
   conf@10.2.0:
     dependencies:
       ajv: 8.20.0
-      ajv-formats: 2.1.1(ajv@8.20.0)
+      ajv-formats: 2.1.1
       atomically: 1.7.0
       debounce-fn: 4.0.0
       dot-prop: 6.0.1
