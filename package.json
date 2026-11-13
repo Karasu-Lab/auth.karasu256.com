@@ -21,7 +21,7 @@
     "@fortawesome/free-brands-svg-icons": "^7.2.0",
     "@fortawesome/free-solid-svg-icons": "^7.2.0",
     "@fortawesome/react-fontawesome": "^3.3.1",
-    "@karasu-lab/flags-sdk": "0.1.0-dab071f",
+    "@karasu-lab/flags": "0.1.0-190fe8c",
     "@karasu-lab/sdk": "0.1.0-0fdbfba",
     "@karasu-lab/types": "0.1.0-1950a9c",
     "@karasu-lab/ui": "0.1.0-df38f4a",
