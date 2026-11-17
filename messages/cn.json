@@ -49,6 +49,16 @@
     "next": "下一步",
     "passwordTitle": "输入密码",
     "backToSignIn": "返回登录",
+    "code": {
+      "link": "使用邮件验证码登录",
+      "title": "输入验证码",
+      "description": "我们已向 {email} 发送了 6 位验证码。请输入字母和数字。",
+      "label": "登录验证码",
+      "submit": "登录",
+      "resend": "重新发送验证码",
+      "invalid": "验证码不正确。请重试",
+      "expired": "验证码无效或已过期。请重新发送验证码"
+    },
     "passkey": {
       "title": "使用通行密钥登录",
       "button": "使用通行密钥"

@@ -49,6 +49,16 @@
     "next": "Next",
     "passwordTitle": "Enter your password",
     "backToSignIn": "Back to sign in",
+    "code": {
+      "link": "Sign in with an emailed code",
+      "title": "Enter the code",
+      "description": "We sent a 6-character code to {email}. Enter the letters and numbers.",
+      "label": "Sign-in code",
+      "submit": "Sign in",
+      "resend": "Resend the code",
+      "invalid": "The code is incorrect. Please try again",
+      "expired": "The code is invalid or has expired. Please resend the code"
+    },
     "passkey": {
       "title": "Sign in with a passkey",
       "button": "Use a passkey"
