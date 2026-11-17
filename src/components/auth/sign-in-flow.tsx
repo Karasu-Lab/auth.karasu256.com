@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 import { Button, Input, Label, PasswordInput, SlideStep, SlideSteps, Turnstile, type TurnstileHandle } from '@karasu-lab/ui';
 import { useSdk } from '@/lib/auth/client';
 import { isDeviceSessionConflict } from '@/lib/device-session-conflict';
+import { startEmailChallenge, verifyEmailChallengeOtp } from '@/lib/email-challenge';
 import { lookupSignIn, type SignInLookup } from '@/lib/sign-in-lookup';
 import { ProviderButtons } from './provider-buttons';
 
@@ -15,11 +16,10 @@ export interface SignInFlowProps {
   forceLogin: boolean;
 }
 
-type Step = 'email' | 'passkey' | 'methods' | 'password' | 'reset';
+type Step = 'email' | 'passkey' | 'methods' | 'password' | 'code' | 'reset';
 
 /** The sliding form panels, in order. */
-const FORM_STEPS: readonly Step[] = ['email', 'passkey', 'methods', 'password', 'reset'];
-
+const FORM_STEPS: readonly Step[] = ['email', 'passkey', 'methods', 'password', 'code', 'reset'];
 /** Indeterminate bar pinned to the top edge of the container while a step is working. */
 function ProgressBar({ active }: { active: boolean }) {
   return (
@@ -61,6 +61,8 @@ export function SignInFlow({ continueTo, forceLogin }: SignInFlowProps) {
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [resetError, setResetError] = useState<string | null>(null);
   const [resetSent, setResetSent] = useState(false);
+  const [code, setCode] = useState('');
+  const [codeError, setCodeError] = useState<string | null>(null);
 
   // Bot verification for the credential submissions. The widget mints a
   // single-use token the gated calls carry; while a site key is
@@ -175,6 +177,37 @@ export function SignInFlow({ continueTo, forceLogin }: SignInFlowProps) {
     }
     const url = (data as { url?: string } | null)?.url;
     handleSignedIn(url);
+  }
+
+  async function handleCodeStart() {
+    setBusy(true);
+    setCodeError(null);
+    setPasswordError(null);
+    setCode('');
+    const result = await startEmailChallenge(sdk.hosts.authApiUrl, email);
+    if (!result.ok) {
+      const message = result.status === 429 ? t('signIn.error.rateLimitedLessThan', { minutes: 1 }) : t('signIn.error.unknown');
+      if (step === 'code') setCodeError(message);
+      else setPasswordError(message);
+      setBusy(false);
+      return;
+    }
+    setStep('code');
+    setBusy(false);
+  }
+
+  async function handleCodeSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    setCodeError(null);
+    const result = await verifyEmailChallengeOtp(sdk.hosts.authApiUrl, code);
+    if (!result.ok) {
+      const rejected = result.code === 'INVALID_OTP' ? t('signIn.code.invalid') : t('signIn.code.expired');
+      setCodeError(result.status === 400 || result.status === 401 || result.status === 429 ? rejected : t('signIn.error.unknown'));
+      setBusy(false);
+      return;
+    }
+    handleSignedIn();
   }
 
   async function handleResetSubmit(e: React.FormEvent) {
@@ -358,7 +391,15 @@ export function SignInFlow({ continueTo, forceLogin }: SignInFlowProps) {
                   />
                   {passwordError && <p className="text-sm text-destructive">{passwordError}</p>}
                 </div>
-                <div className="mt-3 flex justify-end">
+                <div className="mt-3 flex items-center justify-between gap-3">
+                  <button
+                    type="button"
+                    disabled={busy || step !== 'password'}
+                    onClick={() => void handleCodeStart()}
+                    className="text-left text-sm font-medium text-primary hover:underline disabled:opacity-50"
+                  >
+                    {t('signIn.code.link')}
+                  </button>
                   <button
                     type="button"
                     disabled={busy || step !== 'password'}
@@ -371,6 +412,46 @@ export function SignInFlow({ continueTo, forceLogin }: SignInFlowProps) {
                 <div className="mt-6 flex justify-end pr-1 pb-1">
                   <Button type="submit" disabled={busy || !password || step !== 'password' || turnstilePending}>
                     {t('signIn.submit')}
+                  </Button>
+                </div>
+              </form>
+            </SlideStep>
+
+            <SlideStep aria-hidden={step !== 'code'}>
+              <form onSubmit={handleCodeSubmit}>
+                {backChip('password', busy || step !== 'code')}
+                <h1 className="mt-2 text-lg font-semibold">{t('signIn.code.title')}</h1>
+                <p className="mt-1 text-sm text-muted-foreground">{t('signIn.code.description', { email })}</p>
+                <div className="mt-6 space-y-2">
+                  <Label htmlFor="sign-in-code">{t('signIn.code.label')}</Label>
+                  <Input
+                    id="sign-in-code"
+                    name="code"
+                    autoComplete="one-time-code"
+                    autoCapitalize="characters"
+                    spellCheck={false}
+                    maxLength={6}
+                    className="font-mono uppercase tracking-[0.3em]"
+                    value={code}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setCode(e.target.value.toUpperCase())}
+                    required
+                    disabled={busy || step !== 'code'}
+                  />
+                  {codeError && <p className="text-sm text-destructive">{codeError}</p>}
+                </div>
+                <div className="mt-3 flex justify-end">
+                  <button
+                    type="button"
+                    disabled={busy || step !== 'code'}
+                    onClick={() => void handleCodeStart()}
+                    className="text-sm text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
+                  >
+                    {t('signIn.code.resend')}
+                  </button>
+                </div>
+                <div className="mt-6 flex justify-end pr-1 pb-1">
+                  <Button type="submit" disabled={busy || code.length !== 6 || step !== 'code'}>
+                    {t('signIn.code.submit')}
                   </Button>
                 </div>
               </form>
