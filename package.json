@@ -25,7 +25,7 @@
     "@karasu-lab/sdk": "0.1.0-0fdbfba",
     "@karasu-lab/types": "0.1.0-1950a9c",
     "@karasu-lab/ui": "0.1.0-df38f4a",
-    "@karasu-lab/utils": "0.1.0-be51f04",
+    "@karasu-lab/utils": "0.1.0-11f53a9",
     "better-auth": "^1.7.12",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
