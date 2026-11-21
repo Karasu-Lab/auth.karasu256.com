@@ -51,7 +51,13 @@ export function SignUpForm({ continueTo }: SignUpFormProps) {
         },
         onError: (ctx) => {
           turnstileRef.current?.reset();
-          toast.error(ctx.error.message);
+          if (ctx.error.code === 'VERIFICATION_EMAIL_RESENT') {
+            toast.success(t('emailVerifyComplete.resent'), { autoClose: true });
+          } else if (ctx.error.code === 'VERIFICATION_EMAIL_RATE_LIMITED') {
+            toast.error(t('emailVerifyComplete.rateLimited'));
+          } else {
+            toast.error(ctx.error.message);
+          }
           setLoading(false);
         },
       }

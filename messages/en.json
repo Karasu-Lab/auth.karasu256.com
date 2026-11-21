@@ -259,6 +259,13 @@
   "oauthCallback": {
     "redirecting": "Redirecting"
   },
+  "emailVerifyComplete": {
+    "title": "Email address verified",
+    "message": "Your email address has been verified.",
+    "continue": "Continue",
+    "resent": "This email address is already registered but not verified. We sent the verification email again.",
+    "rateLimited": "Too many verification emails were requested. Please try again later."
+  },
   "oauthError": {
     "title": "Sign-in failed",
     "message": "An error occurred while authenticating your account. Please try again.",
