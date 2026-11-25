@@ -9,6 +9,8 @@ const oauthProvidersSchema = z.object({
       id: z.string(),
       label: z.string(),
       kind: z.enum(['social', 'derived', 'passkey']),
+      signIn: z.boolean(),
+      link: z.boolean(),
       backgroundColor: themeColorSchema,
       foregroundColor: themeColorSchema,
       iconUrl: z.url(),
@@ -21,7 +23,7 @@ export type OAuthProvider = z.infer<typeof oauthProvidersSchema>['providers'][nu
 export async function fetchSignInProviders(): Promise<OAuthProvider[]> {
   const base = process.env.API_URL;
   if (!base) throw new MissingEnvError('API_URL');
-  const res = await fetch(`${base}/api/oauth/providers?kind=social,passkey`, { next: { revalidate: 300 } });
+  const res = await fetch(`${base}/api/oauth/providers?usage=signIn`, { next: { revalidate: 300 } });
   if (!res.ok) throw new Error(`api.karasu256.com responded ${res.status} for ${res.url}`);
   return oauthProvidersSchema.parse(await res.json()).providers;
 }
