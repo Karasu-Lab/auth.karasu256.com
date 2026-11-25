@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { CardContent, CardHeader, Container } from '@karasu-lab/ui';
 import { getClientConfig } from '@/lib/auth/client-config';
@@ -11,9 +12,14 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t('emailVerifyComplete.title') };
 }
 
-export default async function EmailVerifyCompletePage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
+export default async function EmailVerifyCompletePage({ searchParams }: { searchParams: Promise<{ next?: string; error?: string }> }) {
   const t = await getTranslations();
-  const { next } = await searchParams;
+  const { next, error } = await searchParams;
+  if (error) {
+    const params = new URLSearchParams({ error });
+    if (next) params.set('next', next);
+    redirect(`/email/verify/error?${params.toString()}`);
+  }
   const config = getClientConfig();
   const continueTo = resolveRedirectTo(next, getTrustedOrigins(config), '');
 
