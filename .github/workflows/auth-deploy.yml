@@ -5,12 +5,32 @@ on:
     branches: ["**"]
   workflow_dispatch:
 
-# Deployment itself lives in Karasu-Lab/WorkersDeploy: it deploys this
-# app standalone from this repository, detects the Next.js project,
-# builds it with OpenNext, and deploys it to Cloudflare Workers.
-
 jobs:
+  names:
+    runs-on: ubuntu-latest
+    outputs:
+      secret-names: ${{ steps.names.outputs.value }}
+    steps:
+      - name: Expand the names passed to the worker
+        id: names
+        env:
+          NAMES: |
+            APP_ENV
+            ACCOUNTS_URL
+            API_URL
+            APP_URL
+            AUTH_API_URL
+            TRUSTED_ORIGINS
+            TURNSTILE_SITE_KEY
+        run: |
+          {
+            echo 'value<<NAMES'
+            echo "$NAMES"
+            echo 'NAMES'
+          } >> "$GITHUB_OUTPUT"
+
   deploy:
+    needs: names
     if: github.ref_name == 'main'
     environment: production
     runs-on: ubuntu-latest
@@ -26,9 +46,11 @@ jobs:
         with:
           mode: production
           worker-name: auth-karasu256-com
+          secret-names: ${{ needs.names.outputs.secret-names }}
           vars-json: ${{ toJSON(vars) }}
 
   preview:
+    needs: names
     if: github.ref_name != 'main'
     environment: preview
     runs-on: ubuntu-latest
@@ -45,4 +67,5 @@ jobs:
         with:
           mode: production
           worker-name: dev-auth-karasu256-com
+          secret-names: ${{ needs.names.outputs.secret-names }}
           vars-json: ${{ toJSON(vars) }}
