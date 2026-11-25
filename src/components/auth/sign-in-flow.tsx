@@ -8,12 +8,14 @@ import { Button, Input, Label, PasswordInput, SlideStep, SlideSteps, Turnstile, 
 import { useSdk } from '@/lib/auth/client';
 import { isDeviceSessionConflict } from '@/lib/device-session-conflict';
 import { startEmailChallenge, verifyEmailChallengeOtp } from '@/lib/email-challenge';
+import type { OAuthProvider } from '@/lib/oauth-providers';
 import { lookupSignIn, type SignInLookup } from '@/lib/sign-in-lookup';
 import { ProviderButtons } from './provider-buttons';
 
 export interface SignInFlowProps {
   continueTo: string;
   forceLogin: boolean;
+  providers: OAuthProvider[];
 }
 
 type Step = 'email' | 'passkey' | 'methods' | 'password' | 'code' | 'reset';
@@ -46,7 +48,7 @@ function ProgressBar({ active }: { active: boolean }) {
  * the email step's button row, in line with its Next button. The `continueTo` callback context is held in
  * this component's props for the whole flow, so no step loses it.
  */
-export function SignInFlow({ continueTo, forceLogin }: SignInFlowProps) {
+export function SignInFlow({ continueTo, forceLogin, providers }: SignInFlowProps) {
   const t = useTranslations();
   const { sdk, config } = useSdk();
   const { authClient } = sdk;
@@ -309,7 +311,7 @@ export function SignInFlow({ continueTo, forceLogin }: SignInFlowProps) {
                 <span className="h-px flex-1 bg-foreground/10" />
               </div>
               <div className="mt-5">
-                <ProviderButtons continueTo={continueTo} onSignedIn={handleSignedIn} disabled={busy || step !== 'email'} />
+                <ProviderButtons providers={providers} continueTo={continueTo} onSignedIn={handleSignedIn} disabled={busy || step !== 'email'} />
               </div>
             </SlideStep>
 

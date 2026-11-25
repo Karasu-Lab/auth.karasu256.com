@@ -1,6 +1,7 @@
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
+import { fetchSocialProviders } from '@/lib/oauth-providers';
 import { SignInClient } from './client';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -8,11 +9,12 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t('signIn.title') };
 }
 
-export default function SignInPage() {
+export default async function SignInPage() {
+  const providers = await fetchSocialProviders();
   return (
     <main className="flex flex-1 items-center justify-center p-4">
       <Suspense>
-        <SignInClient />
+        <SignInClient providers={providers} />
       </Suspense>
     </main>
   );

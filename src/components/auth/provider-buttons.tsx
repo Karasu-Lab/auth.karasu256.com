@@ -8,26 +8,16 @@ import { Spinner, toast } from '@karasu-lab/ui';
 import { buildUriWithNext } from '@karasu-lab/sdk/uri';
 import { useSdk } from '@/lib/auth/client';
 import { isDeviceSessionConflict } from '@/lib/device-session-conflict';
-import { socialProviders } from './provider-definitions';
+import type { OAuthProvider } from '@/lib/oauth-providers';
 
 export interface ProviderButtonsProps {
+  providers: OAuthProvider[];
   continueTo: string;
-  /** Called after a passkey sign-in, with the URL better-auth asked to continue to, if any. */
   onSignedIn: (redirectUrl?: string) => void;
-  /** Disables all the buttons, e.g. while the email step is working. */
   disabled?: boolean;
 }
 
-/**
- * The provider sign-in buttons as a row of round icon buttons: the social
- * providers from `provider-definitions`, plus passkey. They are plain
- * press targets — standard hover and pressed feedback, no sliding
- * animation — and sit side by side under the email step. Social sign-in
- * delegates the OAuth handshake to better-auth, which lands on
- * `/auth/callback` to confirm the session before continuing; the passkey
- * button runs a discoverable-credential ceremony.
- */
-export function ProviderButtons({ continueTo, onSignedIn, disabled = false }: ProviderButtonsProps) {
+export function ProviderButtons({ providers, continueTo, onSignedIn, disabled = false }: ProviderButtonsProps) {
   const {
     sdk: { authClient },
   } = useSdk();
@@ -36,8 +26,6 @@ export function ProviderButtons({ continueTo, onSignedIn, disabled = false }: Pr
 
   async function handleSocial(provider: string) {
     setLoading(provider);
-    // Both URLs must be absolute: better-auth resolves relative ones
-    // against the auth API's origin, where these pages do not exist.
     const { error } = await authClient.signIn.social({
       provider,
       callbackURL: buildUriWithNext(`${window.location.origin}/auth/callback`, continueTo),
@@ -63,7 +51,7 @@ export function ProviderButtons({ continueTo, onSignedIn, disabled = false }: Pr
 
   return (
     <div className="flex items-center justify-center gap-3">
-      {socialProviders.map(({ id, label, icon }) => (
+      {providers.map(({ id, label, iconUrl }) => (
         <button
           key={id}
           type="button"
@@ -73,7 +61,7 @@ export function ProviderButtons({ continueTo, onSignedIn, disabled = false }: Pr
           disabled={disabled || loading !== null}
           onClick={() => void handleSocial(id)}
         >
-          {loading === id ? <Spinner /> : <FontAwesomeIcon icon={icon} className="h-5 w-5" />}
+          {loading === id ? <Spinner /> : <img src={iconUrl} alt="" className="h-5 w-5" />}
         </button>
       ))}
       <button
