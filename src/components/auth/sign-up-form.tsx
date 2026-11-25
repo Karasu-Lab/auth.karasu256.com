@@ -15,7 +15,7 @@ import { LocalizedPasswordStrengthIndicator } from './localized-password-strengt
  * a terms agreement, against better-auth. On success it shows the account
  * created page, which asks the user to check their email.
  */
-export function SignUpForm() {
+export function SignUpForm({ next }: { next: string | null }) {
   const t = useTranslations();
   const router = useRouter();
   const {
@@ -40,7 +40,7 @@ export function SignUpForm() {
     e.preventDefault();
     setLoading(true);
     await authClient.signUp.email(
-      { email, password, name: email },
+      { email, password, name: email, callbackURL: next ? `/email/verify/complete?next=${encodeURIComponent(next)}` : undefined },
       {
         headers: turnstileToken ? { 'cf-turnstile-response': turnstileToken } : undefined,
         onSuccess: () => {

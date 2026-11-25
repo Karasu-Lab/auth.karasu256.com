@@ -295,7 +295,7 @@ export function SignInFlow({ continueTo, forceLogin, providers }: SignInFlowProp
                   </div>
                 )}
                 <div className="mt-6 flex items-center justify-between pr-1 pb-1">
-                  <Link href="/sign-up" className="flex items-center gap-1.5 text-sm font-medium text-primary hover:underline">
+                  <Link href={`/sign-up?next=${encodeURIComponent(continueTo)}`} className="flex items-center gap-1.5 text-sm font-medium text-primary hover:underline">
                     <UserPlus className="h-4 w-4" />
                     {t('signIn.createAccount')}
                   </Link>
