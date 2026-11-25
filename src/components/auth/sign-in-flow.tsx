@@ -6,6 +6,7 @@ import { ChevronLeft, Fingerprint, KeyRound, LockKeyhole, UserPlus } from 'lucid
 import { useTranslations } from 'next-intl';
 import { Button, Input, Label, PasswordInput, SlideStep, SlideSteps, Turnstile, type TurnstileHandle } from '@karasu-lab/ui';
 import { useSdk } from '@/lib/auth/client';
+import { useUser } from '@/lib/auth/use-user';
 import { isDeviceSessionConflict } from '@/lib/device-session-conflict';
 import { startEmailChallenge, verifyEmailChallengeOtp } from '@/lib/email-challenge';
 import type { OAuthProvider } from '@/lib/oauth-providers';
@@ -52,7 +53,7 @@ export function SignInFlow({ continueTo, forceLogin, providers }: SignInFlowProp
   const t = useTranslations();
   const { sdk, config } = useSdk();
   const { authClient } = sdk;
-  const { data: session } = authClient.useSession();
+  const { user } = useUser();
   const [step, setStep] = useState<Step>('email');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -81,8 +82,8 @@ export function SignInFlow({ continueTo, forceLogin, providers }: SignInFlowProp
   // A user who already has a session does not need this form, unless the
   // caller explicitly asked to sign in another account on top of it.
   useEffect(() => {
-    if (session && !forceLogin) window.location.replace(continueTo);
-  }, [session, forceLogin, continueTo]);
+    if (user && !forceLogin) window.location.replace(continueTo);
+  }, [user, forceLogin, continueTo]);
 
   function handleSignedIn(redirectUrl?: string) {
     window.location.replace(redirectUrl ?? continueTo);
