@@ -1,8 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFingerprint } from '@fortawesome/free-solid-svg-icons';
+import { useState, type CSSProperties } from 'react';
 import { useTranslations } from 'next-intl';
 import { Spinner, toast } from '@karasu-lab/ui';
 import { buildUriWithNext } from '@karasu-lab/sdk/uri';
@@ -35,8 +33,8 @@ export function ProviderButtons({ providers, continueTo, onSignedIn, disabled = 
     if (error) setLoading(null);
   }
 
-  async function handlePasskey() {
-    setLoading('passkey');
+  async function handlePasskey(id: string) {
+    setLoading(id);
     const result = await authClient.signIn.passkey();
     if (result?.error) {
       toast.error(isDeviceSessionConflict(result.error) ? t('signIn.error.accountAlreadySignedIn') : (result.error.message ?? t('passkey.error.unknown')));
@@ -47,34 +45,32 @@ export function ProviderButtons({ providers, continueTo, onSignedIn, disabled = 
     onSignedIn(data?.redirect && data.url ? data.url : undefined);
   }
 
-  const buttonClass =
-    'flex h-11 w-11 items-center justify-center rounded-full ring-1 ring-foreground/15 transition-colors hover:bg-muted active:bg-foreground/10 disabled:opacity-50';
+  const signInHandlers: Partial<Record<OAuthProvider['kind'], (id: string) => Promise<void>>> = {
+    social: handleSocial,
+    passkey: handlePasskey,
+  };
 
   return (
-    <div className="flex items-center justify-center gap-3">
-      {providers.map(({ id, label, iconUrl }) => (
+    <div className="flex flex-wrap items-center justify-center gap-3">
+      {providers.map(({ id, kind, label, iconUrl, backgroundColor, foregroundColor }) => (
         <button
           key={id}
           type="button"
           aria-label={label}
           title={label}
-          className={buttonClass}
+          className="flex aspect-square w-[calc((100%-3rem)/5)] max-w-11 shrink-0 items-center justify-center rounded-full bg-(--provider-background) ring-1 ring-foreground/15 transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-50 dark:bg-(--provider-background-dark)"
+          style={
+            {
+              '--provider-background': backgroundColor.default,
+              '--provider-background-dark': backgroundColor.dark,
+            } as CSSProperties
+          }
           disabled={disabled || loading !== null}
-          onClick={() => void handleSocial(id)}
+          onClick={() => void signInHandlers[kind]?.(id)}
         >
-          {loading === id ? <Spinner /> : <ProviderIcon iconUrl={iconUrl} className="h-5 w-5" />}
+          {loading === id ? <Spinner /> : <ProviderIcon iconUrl={iconUrl} className="aspect-square w-1/2" color={foregroundColor} />}
         </button>
       ))}
-      <button
-        type="button"
-        aria-label={t('passkey.signIn')}
-        title={t('passkey.signIn')}
-        className={buttonClass}
-        disabled={disabled || loading !== null}
-        onClick={() => void handlePasskey()}
-      >
-        {loading === 'passkey' ? <Spinner /> : <FontAwesomeIcon icon={faFingerprint} className="h-5 w-5" />}
-      </button>
     </div>
   );
 }
