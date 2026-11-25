@@ -1,5 +1,14 @@
 import type { ClientConfig } from '@/lib/auth/client-config';
 
+function matchesOriginPattern(origin: string, pattern: string): boolean {
+  if (!pattern.includes('*')) return origin === pattern;
+  const source = pattern
+    .split('*')
+    .map((part) => part.replace(/[.+?^${}()|[\]\\]/g, '\\$&'))
+    .join('[^/]*');
+  return new RegExp(`^${source}$`).test(origin);
+}
+
 export function resolveRedirectTo(raw: string | null | undefined, trustedOrigins: readonly string[], fallback: string): string {
   if (!raw) return fallback;
 
@@ -13,7 +22,7 @@ export function resolveRedirectTo(raw: string | null | undefined, trustedOrigins
   }
 
   if (url.protocol !== 'https:' && url.protocol !== 'http:') return fallback;
-  if (!trustedOrigins.includes(url.origin)) return fallback;
+  if (!trustedOrigins.some((pattern) => matchesOriginPattern(url.origin, pattern))) return fallback;
   return url.toString();
 }
 
