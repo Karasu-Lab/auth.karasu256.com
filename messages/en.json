@@ -259,6 +259,10 @@
   "oauthCallback": {
     "redirecting": "Redirecting"
   },
+  "signUpComplete": {
+    "title": "Account created",
+    "message": "Your account has been created. We sent a verification email to your address. Please check your inbox and follow the link in it to verify your email address."
+  },
   "emailVerifyComplete": {
     "title": "Email address verified",
     "message": "Your email address has been verified.",

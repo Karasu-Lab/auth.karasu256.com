@@ -259,6 +259,10 @@
   "oauthCallback": {
     "redirecting": "重定向中"
   },
+  "signUpComplete": {
+    "title": "账户已创建",
+    "message": "您的账户已创建。我们已向您的邮箱发送了验证邮件，请查收邮件并点击其中的链接验证您的邮箱地址。"
+  },
   "emailVerifyComplete": {
     "title": "邮箱地址已验证",
     "message": "您的邮箱地址已验证。",
