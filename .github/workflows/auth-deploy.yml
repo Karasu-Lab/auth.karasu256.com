@@ -20,10 +20,9 @@ jobs:
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Deploy the worker
-        uses: Karasu-Lab/WorkersDeploy@v1.0.11
+        uses: Karasu-Lab/WorkersDeploy@v2.0.1
         with:
           mode: production
           worker-name: auth-karasu256-com
@@ -38,10 +37,9 @@ jobs:
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Deploy the worker
-        uses: Karasu-Lab/WorkersDeploy@v1.0.11
+        uses: Karasu-Lab/WorkersDeploy@v2.0.1
         with:
           mode: preview
           worker-name: auth-karasu256-com
