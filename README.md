@@ -8,4 +8,11 @@ Run commands from the repository root, e.g. `pnpm --filter auth.karasu256.com de
 
 ## Deployment
 
-Deployed as a Cloudflare Worker by `.github/workflows/auth-deploy.yml`, a thin wrapper around the shared [`deploy-worker`](https://github.com/Karasu-Lab/Workers) action (`Karasu-Lab/Workers/deploy-worker@v1`): pushes to `main` deploy production, other branches deploy a per-branch Preview (only the newest five Previews are kept). No custom domain is attached yet; the worker serves on its workers.dev subdomain. The workflow reads `CLOUDFLARE_API_TOKEN` (secret) and `CLOUDFLARE_ACCOUNT_ID` (variable) from the `production` / `preview` GitHub Environments.
+Deployed as Cloudflare Workers by `.github/workflows/auth-deploy.yml`, which calls the shared `Karasu-Lab/WorkersDeploy` action. There are two separate workers:
+
+- `auth-karasu256-com` serves production (`auth.karasu256.com`). Only pushes to `main` deploy it; per-branch Previews are not used.
+- `dev-auth-karasu256-com` serves the preview environment on `dev-auth.karasu256.com` (the `dev` environment in `wrangler.jsonc`, selected with `CLOUDFLARE_ENV=dev`). Pushes to any other branch deploy it.
+
+The variables (`APP_ENV`, `ACCOUNTS_URL`, `API_URL`, `APP_URL`, `AUTH_API_URL`, `TRUSTED_ORIGINS`, `TURNSTILE_SITE_KEY`) are not in `wrangler.jsonc`; they are injected from the `production` / `preview` GitHub Environment variables.
+
+The workflow reads `CLOUDFLARE_API_TOKEN` (secret) and `CLOUDFLARE_ACCOUNT_ID` (variable) from the `production` / `preview` GitHub Environments.
