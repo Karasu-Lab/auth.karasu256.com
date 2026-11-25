@@ -5,6 +5,7 @@ const clientConfigEnvSchema = z.object({
   AUTH_URL: z.url().optional(),
   ACCOUNTS_URL: z.url(),
   APP_URL: z.url(),
+  APP_ENV: z.string().optional(),
   TURNSTILE_SITE_KEY: z.string().optional(),
   TRUSTED_ORIGINS: z
     .string()
@@ -34,7 +35,7 @@ export function getClientConfig(): ClientConfig {
     authUrl: env.AUTH_URL,
     accountsUrl: env.ACCOUNTS_URL,
     appUrl: env.APP_URL,
-    turnstileSiteKey: env.TURNSTILE_SITE_KEY ?? '',
+    turnstileSiteKey: env.APP_ENV === 'local' || env.APP_ENV === 'preview' ? '' : (env.TURNSTILE_SITE_KEY ?? ''),
     trustedOrigins: env.TRUSTED_ORIGINS,
   };
 }
