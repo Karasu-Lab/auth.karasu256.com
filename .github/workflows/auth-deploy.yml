@@ -26,6 +26,7 @@ jobs:
         with:
           mode: production
           worker-name: auth-karasu256-com
+          vars-json: ${{ toJSON(vars) }}
 
   preview:
     if: github.ref_name != 'main'
@@ -37,9 +38,11 @@ jobs:
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_ENV: dev
     steps:
       - name: Deploy the worker
         uses: Karasu-Lab/WorkersDeploy@v2.0.1
         with:
-          mode: preview
-          worker-name: auth-karasu256-com
+          mode: production
+          worker-name: dev-auth-karasu256-com
+          vars-json: ${{ toJSON(vars) }}
