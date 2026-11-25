@@ -8,7 +8,7 @@ Run commands from the repository root, e.g. `pnpm --filter auth.karasu256.com de
 
 ## Deployment
 
-Deployed as Cloudflare Workers by `.github/workflows/auth-deploy.yml`, which calls the shared `Karasu-Lab/WorkersDeploy` action. There are two separate workers:
+Deployed as Cloudflare Workers by `.github/workflows/deploy.yml`, which calls the shared `Karasu-Lab/WorkersDeploy` action. There are two separate workers:
 
 - `auth-karasu256-com` serves production (`auth.karasu256.com`). Only pushes to `main` deploy it; per-branch Previews are not used.
 - `dev-auth-karasu256-com` serves the preview environment on `dev-auth.karasu256.com` (the `dev` environment in `wrangler.jsonc`, selected with `CLOUDFLARE_ENV=dev`). Pushes to any other branch deploy it.
