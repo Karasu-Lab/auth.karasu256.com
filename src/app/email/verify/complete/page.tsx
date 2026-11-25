@@ -3,6 +3,8 @@ import { getTranslations } from 'next-intl/server';
 import { CardContent, CardHeader, Container } from '@karasu-lab/ui';
 import { getClientConfig } from '@/lib/auth/client-config';
 
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations();
   return { title: t('emailVerifyComplete.title') };
