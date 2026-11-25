@@ -56,7 +56,7 @@ export function SignUpForm({ continueTo }: SignUpFormProps) {
           } else if (ctx.error.code === 'VERIFICATION_EMAIL_RATE_LIMITED') {
             toast.error(t('emailVerifyComplete.rateLimited'));
           } else {
-            toast.error(ctx.error.message || t('signIn.error.unknown'));
+            toast.error(ctx.error.message);
           }
           setLoading(false);
         },
