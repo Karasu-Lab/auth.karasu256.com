@@ -33,6 +33,7 @@
     "error": {
       "invalid-credential": "メールアドレスまたはパスワードが正しくありません",
       "too-many-requests": "ログイン試行回数が多すぎます。しばらくしてからお試しください",
+      "botVerificationFailed": "ボット検証に失敗しました。ページを再読み込みして、もう一度お試しください。",
       "user-disabled": "このアカウントは無効化されています",
       "email-already-in-use": "このメールアドレスはすでに使用されています",
       "weak-password": "パスワードが短すぎます",
