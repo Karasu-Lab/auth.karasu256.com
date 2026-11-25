@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { LoadingView } from '@karasu-lab/ui';
 import { useSdk } from '@/lib/auth/client';
-import { resolveRedirectTo } from '@/lib/redirect';
+import { getTrustedOrigins, resolveRedirectTo } from '@/lib/redirect';
 
 export function SignOutClient() {
   const searchParams = useSearchParams();
@@ -14,7 +14,7 @@ export function SignOutClient() {
     config,
   } = useSdk();
   const t = useTranslations();
-  const next = resolveRedirectTo(searchParams.get('next'), config.trustedOrigins, '/sign-in');
+  const next = resolveRedirectTo(searchParams.get('next'), getTrustedOrigins(config), '/sign-in');
 
   useEffect(() => {
     async function performSignOut() {

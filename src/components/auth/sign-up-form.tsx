@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUserPlus } from '@fortawesome/free-solid-svg-icons';
 import { useTranslations } from 'next-intl';
@@ -9,17 +10,14 @@ import { useSdk } from '@/lib/auth/client';
 import { Button, Checkbox, Input, Label, PasswordInput, Turnstile, type TurnstileHandle } from '@karasu-lab/ui';
 import { LocalizedPasswordStrengthIndicator } from './localized-password-strength-indicator';
 
-export interface SignUpFormProps {
-  continueTo: string;
-}
-
 /**
  * Account creation form: email and password with a strength indicator and
- * a terms agreement, against better-auth. On success it continues to the
- * already-validated `continueTo` URL, like the sign-in flow does.
+ * a terms agreement, against better-auth. On success it shows the account
+ * created page, which asks the user to check their email.
  */
-export function SignUpForm({ continueTo }: SignUpFormProps) {
+export function SignUpForm({ next }: { next: string | null }) {
   const t = useTranslations();
+  const router = useRouter();
   const {
     sdk: { authClient },
     config,
@@ -42,12 +40,11 @@ export function SignUpForm({ continueTo }: SignUpFormProps) {
     e.preventDefault();
     setLoading(true);
     await authClient.signUp.email(
-      { email, password, name: email },
+      { email, password, name: email, callbackURL: next ? `/email/verify/complete?next=${encodeURIComponent(next)}` : undefined },
       {
         headers: turnstileToken ? { 'cf-turnstile-response': turnstileToken } : undefined,
-        onSuccess: (ctx) => {
-          const data = ctx.data as { redirect?: boolean; url?: string } | null;
-          window.location.replace(data?.redirect && data.url ? data.url : continueTo);
+        onSuccess: () => {
+          router.push('/sign-up/complete');
         },
         onError: (ctx) => {
           turnstileRef.current?.reset();
@@ -56,7 +53,8 @@ export function SignUpForm({ continueTo }: SignUpFormProps) {
           } else if (ctx.error.code === 'VERIFICATION_EMAIL_RATE_LIMITED') {
             toast.error(t('emailVerifyComplete.rateLimited'));
           } else {
-            toast.error(ctx.error.message);
+            console.error(ctx.error);
+            toast.error(ctx.error.message || (ctx.error as { error?: string }).error || ctx.error.statusText);
           }
           setLoading(false);
         },

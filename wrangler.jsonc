@@ -8,8 +8,16 @@
     "nodejs_compat"
   ],
   "env": {
+    "local": {
+      "vars": {
+        "TRUSTED_ORIGINS": "http://localhost:3000,http://localhost:3001,http://localhost:3002,http://localhost:3004,https://local.karasu256.com,https://local-accounts.karasu256.com,https://local-qr.karasu256.com,https://local-auth.karasu256.com"
+      }
+    },
     "dev": {
       "name": "dev-auth-karasu256-com",
+      "vars": {
+        "TRUSTED_ORIGINS": "https://dev-accounts.karasu256.com,https://*.dev-accounts.karasu256.com,https://dev-auth.karasu256.com,https://dev-sso.karasu256.com,https://dev.karasu256.com,https://dev-qr.karasu256.com"
+      },
       "routes": [
         {
           "pattern": "dev-auth.karasu256.com",

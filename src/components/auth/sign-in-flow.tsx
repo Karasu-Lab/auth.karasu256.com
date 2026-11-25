@@ -6,6 +6,7 @@ import { ChevronLeft, Fingerprint, KeyRound, LockKeyhole, UserPlus } from 'lucid
 import { useTranslations } from 'next-intl';
 import { Button, Input, Label, PasswordInput, SlideStep, SlideSteps, Turnstile, type TurnstileHandle } from '@karasu-lab/ui';
 import { useSdk } from '@/lib/auth/client';
+import { useUser } from '@/lib/auth/use-user';
 import { isDeviceSessionConflict } from '@/lib/device-session-conflict';
 import { startEmailChallenge, verifyEmailChallengeOtp } from '@/lib/email-challenge';
 import type { OAuthProvider } from '@/lib/oauth-providers';
@@ -20,9 +21,7 @@ export interface SignInFlowProps {
 
 type Step = 'email' | 'passkey' | 'methods' | 'password' | 'code' | 'reset';
 
-/** The sliding form panels, in order. */
 const FORM_STEPS: readonly Step[] = ['email', 'passkey', 'methods', 'password', 'code', 'reset'];
-/** Indeterminate bar pinned to the top edge of the container while a step is working. */
 function ProgressBar({ active }: { active: boolean }) {
   return (
     <div
@@ -34,25 +33,11 @@ function ProgressBar({ active }: { active: boolean }) {
   );
 }
 
-/**
- * The auth site's sign-in flow, in the same wide container as the SSO
- * site's: a key-mark panel on the left and sliding steps on the right.
- * Entering an email address looks up how that address signs in — a domain
- * with an SSO provider leaves for its identity provider, an account with
- * a passkey slides to the passkey step (with a way out to the other
- * methods when the ceremony fails or is cancelled), and every other
- * account slides straight to the password step. The password step's
- * "forgot password" link slides to a reset panel instead of leaving the
- * flow. Google, GitHub, and passkey also stay available as round icon
- * buttons under the email step, and a sign-up link sits at the left of
- * the email step's button row, in line with its Next button. The `continueTo` callback context is held in
- * this component's props for the whole flow, so no step loses it.
- */
 export function SignInFlow({ continueTo, forceLogin, providers }: SignInFlowProps) {
   const t = useTranslations();
   const { sdk, config } = useSdk();
   const { authClient } = sdk;
-  const { data: session } = authClient.useSession();
+  const { user } = useUser();
   const [step, setStep] = useState<Step>('email');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -66,10 +51,6 @@ export function SignInFlow({ continueTo, forceLogin, providers }: SignInFlowProp
   const [code, setCode] = useState('');
   const [codeError, setCodeError] = useState<string | null>(null);
 
-  // Bot verification for the credential submissions. The widget mints a
-  // single-use token the gated calls carry; while a site key is
-  // configured, those submissions wait for a token, and the widget is
-  // reset after every attempt because a redeemed token cannot be reused.
   const turnstileSiteKey = config.turnstileSiteKey;
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const turnstileRef = useRef<TurnstileHandle>(null);
@@ -78,11 +59,9 @@ export function SignInFlow({ continueTo, forceLogin, providers }: SignInFlowProp
   const resetTurnstileRef = useRef<TurnstileHandle>(null);
   const resetTurnstilePending = Boolean(turnstileSiteKey) && !resetTurnstileToken;
 
-  // A user who already has a session does not need this form, unless the
-  // caller explicitly asked to sign in another account on top of it.
   useEffect(() => {
-    if (session && !forceLogin) window.location.replace(continueTo);
-  }, [session, forceLogin, continueTo]);
+    if (user && !forceLogin) window.location.replace(continueTo);
+  }, [user, forceLogin, continueTo]);
 
   function handleSignedIn(redirectUrl?: string) {
     window.location.replace(redirectUrl ?? continueTo);
@@ -122,7 +101,6 @@ export function SignInFlow({ continueTo, forceLogin, providers }: SignInFlowProp
           }
           setEmailError(isDeviceSessionConflict(error) ? t('signIn.error.accountAlreadySignedIn') : t('signIn.error.unknown'));
         } else if (result.lookup.hasPasskey) {
-          // A registered passkey is always asked for before anything else.
           setStep('passkey');
         } else if (result.lookup.hasPassword) {
           setStep('password');
@@ -145,8 +123,6 @@ export function SignInFlow({ continueTo, forceLogin, providers }: SignInFlowProp
       setBusy(false);
       return;
     }
-    // The passkey ceremony is discoverable-credential based, so confirm
-    // it signed in the account whose email address was entered.
     const current = await sdk.getSession();
     if (current && current.user.email.toLowerCase() !== email.trim().toLowerCase()) {
       await authClient.signOut();
@@ -216,9 +192,6 @@ export function SignInFlow({ continueTo, forceLogin, providers }: SignInFlowProp
     e.preventDefault();
     setBusy(true);
     setResetError(null);
-    // The redirectTo must be absolute: the auth API resolves a relative
-    // path against its own origin when it redirects after verifying the
-    // token, which lands the user on the API host instead of this page.
     const { error } = await authClient.requestPasswordReset(
       {
         email,
@@ -236,7 +209,6 @@ export function SignInFlow({ continueTo, forceLogin, providers }: SignInFlowProp
     setBusy(false);
   }
 
-  /** Small pill that names the entered address and slides back to an earlier step. */
   function backChip(target: Step, disabled: boolean) {
     return (
       <button
@@ -295,7 +267,7 @@ export function SignInFlow({ continueTo, forceLogin, providers }: SignInFlowProp
                   </div>
                 )}
                 <div className="mt-6 flex items-center justify-between pr-1 pb-1">
-                  <Link href="/sign-up" className="flex items-center gap-1.5 text-sm font-medium text-primary hover:underline">
+                  <Link href={`/sign-up?next=${encodeURIComponent(continueTo)}`} className="flex items-center gap-1.5 text-sm font-medium text-primary hover:underline">
                     <UserPlus className="h-4 w-4" />
                     {t('signIn.createAccount')}
                   </Link>
@@ -363,11 +335,6 @@ export function SignInFlow({ continueTo, forceLogin, providers }: SignInFlowProp
 
             <SlideStep aria-hidden={step !== 'password'}>
               <form onSubmit={handlePasswordSubmit} className="relative">
-                {/* Password managers key a saved credential to the username
-                    field of the same form. The steps are split, so the
-                    password form carries a visually hidden mirror of the
-                    entered address — read-only and rendered (disabled or
-                    display:none fields are ignored by autofill). */}
                 <input
                   type="text"
                   name="username"
