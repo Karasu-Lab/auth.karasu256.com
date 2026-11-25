@@ -9,6 +9,7 @@ import { buildUriWithNext } from '@karasu-lab/sdk/uri';
 import { useSdk } from '@/lib/auth/client';
 import { isDeviceSessionConflict } from '@/lib/device-session-conflict';
 import type { OAuthProvider } from '@/lib/oauth-providers';
+import { ProviderIcon } from './provider-icon';
 
 export interface ProviderButtonsProps {
   providers: OAuthProvider[];
@@ -61,7 +62,7 @@ export function ProviderButtons({ providers, continueTo, onSignedIn, disabled = 
           disabled={disabled || loading !== null}
           onClick={() => void handleSocial(id)}
         >
-          {loading === id ? <Spinner /> : <img src={iconUrl} alt="" className="h-5 w-5" />}
+          {loading === id ? <Spinner /> : <ProviderIcon iconUrl={iconUrl} className="h-5 w-5" />}
         </button>
       ))}
       <button
