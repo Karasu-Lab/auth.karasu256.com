@@ -15,4 +15,6 @@ Deployed as Cloudflare Workers by `.github/workflows/deploy.yml`, which calls th
 
 The variables (`APP_ENV`, `ACCOUNTS_URL`, `API_URL`, `APP_URL`, `AUTH_API_URL`, `TRUSTED_ORIGINS`, `TURNSTILE_SITE_KEY`) are not in `wrangler.jsonc`; they are injected from the `production` / `preview` GitHub Environment variables.
 
+The `/.well-known/assetlinks.json` endpoint is rewritten to `AUTH_API_URL`, where the Android Digital Asset Links document is generated from the `ANDROID_DEEPLINK_INFO` GitHub Actions variable.
+
 The workflow reads `CLOUDFLARE_API_TOKEN` (secret) and `CLOUDFLARE_ACCOUNT_ID` (variable) from the `production` / `preview` GitHub Environments.
