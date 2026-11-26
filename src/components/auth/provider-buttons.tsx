@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type CSSProperties } from 'react';
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useTranslations } from 'next-intl';
 import { Spinner, toast } from '@karasu-lab/ui';
 import { buildUriWithNext } from '@karasu-lab/sdk/uri';
@@ -13,17 +13,19 @@ export interface ProviderButtonsProps {
   providers: OAuthProvider[];
   continueTo: string;
   onSignedIn: (redirectUrl?: string) => void;
+  autoStartProvider?: string;
   disabled?: boolean;
 }
 
-export function ProviderButtons({ providers, continueTo, onSignedIn, disabled = false }: ProviderButtonsProps) {
+export function ProviderButtons({ providers, continueTo, onSignedIn, autoStartProvider, disabled = false }: ProviderButtonsProps) {
   const {
     sdk: { authClient },
   } = useSdk();
   const t = useTranslations();
   const [loading, setLoading] = useState<string | null>(null);
+  const autoStarted = useRef(false);
 
-  async function handleSocial(provider: string) {
+  const handleSocial = useCallback(async (provider: string) => {
     setLoading(provider);
     const { error } = await authClient.signIn.social({
       provider,
@@ -31,7 +33,14 @@ export function ProviderButtons({ providers, continueTo, onSignedIn, disabled = 
       errorCallbackURL: `${window.location.origin}/oauth/error`,
     });
     if (error) setLoading(null);
-  }
+  }, [authClient, continueTo]);
+
+  useEffect(() => {
+    if (autoStarted.current || disabled || !autoStartProvider) return;
+    if (!providers.some((provider) => provider.id === autoStartProvider && provider.kind === 'social')) return;
+    autoStarted.current = true;
+    void handleSocial(autoStartProvider);
+  }, [autoStartProvider, disabled, handleSocial, providers]);
 
   async function handlePasskey(id: string) {
     setLoading(id);
