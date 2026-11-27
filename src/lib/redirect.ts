@@ -9,6 +9,38 @@ function matchesOriginPattern(origin: string, pattern: string): boolean {
   return new RegExp(`^${source}$`).test(origin);
 }
 
+export function isNativeOAuthCallback(raw: string): boolean {
+  let url: URL;
+  try {
+    url = new URL(raw);
+  } catch {
+    return false;
+  }
+
+  return (
+    url.protocol === 'karasulab:' &&
+    url.hostname === 'api' &&
+    !url.username &&
+    !url.password &&
+    !url.port &&
+    /^\/auth\/callback\/[a-z0-9-]+$/i.test(url.pathname)
+  );
+}
+
+export function completeNativeOAuthLink(raw: string): string | null {
+  let url: URL;
+  try {
+    url = new URL(raw);
+  } catch {
+    return null;
+  }
+
+  const state = url.searchParams.get('state');
+  if (!isNativeOAuthCallback(raw) || !state || !/^[A-Za-z0-9_-]{16,128}$/.test(state)) return null;
+  url.searchParams.set('linked', url.pathname.split('/').pop() ?? '');
+  return url.toString();
+}
+
 export function resolveRedirectTo(raw: string | null | undefined, trustedOrigins: readonly string[] | null, fallback: string): string {
   if (!raw) return fallback;
 
@@ -21,6 +53,7 @@ export function resolveRedirectTo(raw: string | null | undefined, trustedOrigins
     return fallback;
   }
 
+  if (isNativeOAuthCallback(url.toString())) return url.toString();
   if (url.protocol !== 'https:' && url.protocol !== 'http:') return fallback;
   if (trustedOrigins && !trustedOrigins.some((pattern) => matchesOriginPattern(url.origin, pattern))) return fallback;
   return url.toString();

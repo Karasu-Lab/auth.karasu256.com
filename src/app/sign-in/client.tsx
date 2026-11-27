@@ -14,6 +14,7 @@ export function SignInClient({ providers }: { providers: OAuthProvider[] }) {
     <SignInFlow
       continueTo={getContinueTo(searchParams, config)}
       forceLogin={searchParams.get('prompt') === 'login'}
+      autoStartProvider={searchParams.get('provider') ?? undefined}
       providers={providers}
     />
   );

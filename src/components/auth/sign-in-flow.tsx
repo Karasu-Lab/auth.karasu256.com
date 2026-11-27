@@ -17,6 +17,7 @@ export interface SignInFlowProps {
   continueTo: string;
   forceLogin: boolean;
   providers: OAuthProvider[];
+  autoStartProvider?: string;
 }
 
 type Step = 'email' | 'passkey' | 'methods' | 'password' | 'code' | 'reset';
@@ -33,7 +34,7 @@ function ProgressBar({ active }: { active: boolean }) {
   );
 }
 
-export function SignInFlow({ continueTo, forceLogin, providers }: SignInFlowProps) {
+export function SignInFlow({ continueTo, forceLogin, providers, autoStartProvider }: SignInFlowProps) {
   const t = useTranslations();
   const { sdk, config } = useSdk();
   const { authClient } = sdk;
@@ -283,7 +284,13 @@ export function SignInFlow({ continueTo, forceLogin, providers }: SignInFlowProp
                 <span className="h-px flex-1 bg-foreground/10" />
               </div>
               <div className="mt-5">
-                <ProviderButtons providers={providers} continueTo={continueTo} onSignedIn={handleSignedIn} disabled={busy || step !== 'email'} />
+                <ProviderButtons
+                  providers={providers}
+                  continueTo={continueTo}
+                  onSignedIn={handleSignedIn}
+                  autoStartProvider={autoStartProvider}
+                  disabled={busy || step !== 'email'}
+                />
               </div>
             </SlideStep>
 
