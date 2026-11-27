@@ -73,6 +73,10 @@ export function getRedirectTo(raw: string | null | undefined, config: RedirectCo
   return resolveRedirectTo(raw, getTrustedOrigins(config), getDefaultRedirectTo(config));
 }
 
+export function getOAuthErrorUrl(error?: string | null): string {
+  return error ? `/oauth/error?error=${encodeURIComponent(error)}` : '/oauth/error';
+}
+
 const OAUTH_SIGNATURE_PARAMS = ['sig', 'exp', 'prompt'];
 
 export function getContinueTo(searchParams: URLSearchParams, config: Pick<ClientConfig, 'authApiUrl'> & RedirectConfig): string {

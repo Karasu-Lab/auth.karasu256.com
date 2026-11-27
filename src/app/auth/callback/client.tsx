@@ -5,7 +5,8 @@ import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { LoadingView } from '@karasu-lab/ui';
 import { useSdk } from '@/lib/auth/client';
-import { completeNativeOAuthLink, getRedirectTo, isNativeOAuthCallback } from '@/lib/redirect';
+import { generateOneTimeToken } from '@/lib/one-time-token';
+import { completeNativeOAuthLink, getOAuthErrorUrl, getRedirectTo, isNativeOAuthCallback } from '@/lib/redirect';
 
 const APP_CALLBACK_PATH = '/auth/app/callback';
 
@@ -14,9 +15,7 @@ async function withOneTimeToken(redirectTo: string, authApiUrl: string): Promise
   if (destination.pathname !== APP_CALLBACK_PATH) return redirectTo;
 
   const state = crypto.randomUUID();
-  const response = await fetch(`${authApiUrl.replace(/\/+$/, '')}/api/auth/one-time-token/generate?state=${state}`, { credentials: 'include' });
-  if (!response.ok) throw new Error('one_time_token_failed');
-  destination.searchParams.set('token', ((await response.json()) as { token: string }).token);
+  destination.searchParams.set('token', await generateOneTimeToken(authApiUrl, state));
   destination.searchParams.set('state', state);
   return destination.toString();
 }
@@ -27,6 +26,7 @@ export function OAuthCallbackClient() {
   const t = useTranslations();
   const redirectTo = getRedirectTo(searchParams.get('next'), config);
   const flow = searchParams.get('flow');
+  const incomingError = searchParams.get('error');
 
   useEffect(() => {
     async function completeSignIn() {
@@ -34,7 +34,7 @@ export function OAuthCallbackClient() {
         const callback = new URL(redirectTo);
         const state = callback.searchParams.get('state');
         if (!state || !/^[A-Za-z0-9_-]{16,128}$/.test(state)) {
-          window.location.replace('/oauth/error');
+          window.location.replace(getOAuthErrorUrl(incomingError ?? 'invalid_state'));
           return;
         }
         if (flow === 'link') {
@@ -49,7 +49,7 @@ export function OAuthCallbackClient() {
           }
           const linkCallback = completeNativeOAuthLink(redirectTo);
           if (!linkCallback) {
-            window.location.replace('/oauth/error');
+            window.location.replace(getOAuthErrorUrl(incomingError ?? 'invalid_state'));
             return;
           }
           window.location.replace(linkCallback);
@@ -57,35 +57,25 @@ export function OAuthCallbackClient() {
         }
         const data = await sdk.getSession();
         if (!data) {
-          window.location.replace('/oauth/error');
+          window.location.replace(getOAuthErrorUrl(incomingError ?? 'session_not_found'));
           return;
         }
-        const response = await fetch(
-          `${config.authApiUrl}/api/auth/one-time-token/generate?state=${encodeURIComponent(state)}`,
-          { method: 'POST', credentials: 'include' },
-        );
-        if (!response.ok) {
-          window.location.replace('/oauth/error');
-          return;
-        }
-        const body = (await response.json()) as { token?: string };
-        if (!body.token) {
-          window.location.replace('/oauth/error');
-          return;
-        }
-        callback.searchParams.set('token', body.token);
+        callback.searchParams.set('token', await generateOneTimeToken(config.authApiUrl, state));
         window.location.replace(callback.toString());
         return;
       }
       const data = await sdk.getSession();
       if (!data) {
-        window.location.replace('/oauth/error');
+        window.location.replace(getOAuthErrorUrl(incomingError ?? 'session_not_found'));
         return;
       }
       window.location.replace(await withOneTimeToken(redirectTo, config.authApiUrl));
     }
 
-    completeSignIn().catch(() => window.location.replace('/oauth/error'));
+    completeSignIn().catch((error: unknown) => {
+      const raw = error instanceof Error ? error.message : typeof error === 'string' ? error : null;
+      window.location.replace(getOAuthErrorUrl(raw ? raw : incomingError));
+    });
   }, [flow, redirectTo]);
 
   return <LoadingView message={t('oauthCallback.redirecting')} />;

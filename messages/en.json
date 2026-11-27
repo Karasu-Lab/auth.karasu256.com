@@ -283,7 +283,18 @@
     "account_already_signed_in": "This account is already signed in on this device.",
     "user_not_found": "This account no longer exists. Please sign in with a different method.",
     "backToSignIn": "Back to sign in",
-    "signup_disabled": "This provider is not linked yet. Sign in with email/password first, then connect it from the settings page."
+    "signup_disabled": "This provider is not linked yet. Sign in with email/password first, then connect it from the settings page.",
+    "access_denied": "Sign-in was cancelled at the provider. Please try again.",
+    "state_mismatch": "The sign-in state did not match. Please try signing in again.",
+    "state_security_mismatch": "The sign-in state could not be verified. Please try signing in again.",
+    "state_not_found": "The sign-in session was not found. Please try signing in again.",
+    "email_does_not_match": "The provider account uses a different email address than your account.",
+    "invalid_callback_request": "The sign-in response was invalid. Please try again.",
+    "unable_to_link_account": "The account could not be linked. Please try again.",
+    "unable_to_get_user_info": "Your provider account information could not be retrieved. Please try again.",
+    "invalid_state": "The sign-in link is invalid or has expired. Please try again.",
+    "session_not_found": "Your session could not be confirmed. Please sign in again.",
+    "one_time_token_failed": "A sign-in token could not be issued. Please try again."
   },
   "passwordStrength": {
     "weak": "Weak",

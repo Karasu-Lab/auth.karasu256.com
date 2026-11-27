@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { completeNativeOAuthLink, isNativeOAuthCallback, resolveRedirectTo } from '../src/lib/redirect';
+import { completeNativeOAuthLink, getOAuthErrorUrl, isNativeOAuthCallback, resolveRedirectTo } from '../src/lib/redirect';
 
 describe('native OAuth callback redirects', () => {
   it('accepts the app callback URI for a provider', () => {
@@ -22,6 +22,14 @@ describe('native OAuth callback redirects', () => {
     expect(isNativeOAuthCallback('karasulab://api/auth/callback/xbox')).toBe(true);
     expect(isNativeOAuthCallback('karasulab://api/auth/callback/github/extra')).toBe(false);
     expect(isNativeOAuthCallback('karasulab://api/auth/callback/github?redirect=https://evil.test')).toBe(true);
+  });
+
+  it('carries the error code to the OAuth error page', () => {
+    expect(getOAuthErrorUrl('state_mismatch')).toBe('/oauth/error?error=state_mismatch');
+    expect(getOAuthErrorUrl('access_denied')).toBe('/oauth/error?error=access_denied');
+    expect(getOAuthErrorUrl(null)).toBe('/oauth/error');
+    expect(getOAuthErrorUrl(undefined)).toBe('/oauth/error');
+    expect(getOAuthErrorUrl('')).toBe('/oauth/error');
   });
 
   it('returns linked provider callbacks without generating a sign-in token', () => {
