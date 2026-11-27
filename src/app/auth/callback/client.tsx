@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { LoadingView } from '@karasu-lab/ui';
 import { useSdk } from '@/lib/auth/client';
+import { generateOneTimeToken } from '@/lib/one-time-token';
 import { completeNativeOAuthLink, getOAuthErrorUrl, getRedirectTo, isNativeOAuthCallback } from '@/lib/redirect';
 
 const APP_CALLBACK_PATH = '/auth/app/callback';
@@ -14,9 +15,7 @@ async function withOneTimeToken(redirectTo: string, authApiUrl: string): Promise
   if (destination.pathname !== APP_CALLBACK_PATH) return redirectTo;
 
   const state = crypto.randomUUID();
-  const response = await fetch(`${authApiUrl.replace(/\/+$/, '')}/api/auth/one-time-token/generate?state=${state}`, { credentials: 'include' });
-  if (!response.ok) throw new Error('one_time_token_failed');
-  destination.searchParams.set('token', ((await response.json()) as { token: string }).token);
+  destination.searchParams.set('token', await generateOneTimeToken(authApiUrl, state));
   destination.searchParams.set('state', state);
   return destination.toString();
 }
@@ -61,20 +60,7 @@ export function OAuthCallbackClient() {
           window.location.replace(getOAuthErrorUrl(incomingError ?? 'session_not_found'));
           return;
         }
-        const response = await fetch(
-          `${config.authApiUrl}/api/auth/one-time-token/generate?state=${encodeURIComponent(state)}`,
-          { method: 'POST', credentials: 'include' },
-        );
-        if (!response.ok) {
-          window.location.replace(getOAuthErrorUrl('one_time_token_failed'));
-          return;
-        }
-        const body = (await response.json()) as { token?: string };
-        if (!body.token) {
-          window.location.replace(getOAuthErrorUrl('one_time_token_failed'));
-          return;
-        }
-        callback.searchParams.set('token', body.token);
+        callback.searchParams.set('token', await generateOneTimeToken(config.authApiUrl, state));
         window.location.replace(callback.toString());
         return;
       }
