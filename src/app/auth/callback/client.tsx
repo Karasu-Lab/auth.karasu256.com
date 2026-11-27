@@ -86,11 +86,10 @@ export function OAuthCallbackClient() {
       window.location.replace(await withOneTimeToken(redirectTo, config.authApiUrl));
     }
 
-    completeSignIn().catch((error: unknown) =>
-      window.location.replace(
-        getOAuthErrorUrl(error instanceof Error && /^[a-z][a-z0-9_]*$/.test(error.message) ? error.message : (incomingError ?? 'unknown_error')),
-      ),
-    );
+    completeSignIn().catch((error: unknown) => {
+      const raw = error instanceof Error ? error.message : typeof error === 'string' ? error : null;
+      window.location.replace(getOAuthErrorUrl(raw ? raw : incomingError));
+    });
   }, [flow, redirectTo]);
 
   return <LoadingView message={t('oauthCallback.redirecting')} />;

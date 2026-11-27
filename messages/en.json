@@ -294,8 +294,7 @@
     "unable_to_get_user_info": "Your provider account information could not be retrieved. Please try again.",
     "invalid_state": "The sign-in link is invalid or has expired. Please try again.",
     "session_not_found": "Your session could not be confirmed. Please sign in again.",
-    "one_time_token_failed": "A sign-in token could not be issued. Please try again.",
-    "unknown_error": "An unexpected error occurred. Please try again."
+    "one_time_token_failed": "A sign-in token could not be issued. Please try again."
   },
   "passwordStrength": {
     "weak": "Weak",
