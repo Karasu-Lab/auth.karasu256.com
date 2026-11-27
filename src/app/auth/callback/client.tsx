@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { LoadingView } from '@karasu-lab/ui';
 import { useSdk } from '@/lib/auth/client';
-import { completeNativeOAuthLink, getRedirectTo, isNativeOAuthCallback } from '@/lib/redirect';
+import { completeNativeOAuthLink, getOAuthErrorUrl, getRedirectTo, isNativeOAuthCallback } from '@/lib/redirect';
 
 const APP_CALLBACK_PATH = '/auth/app/callback';
 
@@ -27,6 +27,7 @@ export function OAuthCallbackClient() {
   const t = useTranslations();
   const redirectTo = getRedirectTo(searchParams.get('next'), config);
   const flow = searchParams.get('flow');
+  const incomingError = searchParams.get('error');
 
   useEffect(() => {
     async function completeSignIn() {
@@ -34,7 +35,7 @@ export function OAuthCallbackClient() {
         const callback = new URL(redirectTo);
         const state = callback.searchParams.get('state');
         if (!state || !/^[A-Za-z0-9_-]{16,128}$/.test(state)) {
-          window.location.replace('/oauth/error');
+          window.location.replace(getOAuthErrorUrl(incomingError ?? 'invalid_state'));
           return;
         }
         if (flow === 'link') {
@@ -49,7 +50,7 @@ export function OAuthCallbackClient() {
           }
           const linkCallback = completeNativeOAuthLink(redirectTo);
           if (!linkCallback) {
-            window.location.replace('/oauth/error');
+            window.location.replace(getOAuthErrorUrl(incomingError ?? 'invalid_state'));
             return;
           }
           window.location.replace(linkCallback);
@@ -57,7 +58,7 @@ export function OAuthCallbackClient() {
         }
         const data = await sdk.getSession();
         if (!data) {
-          window.location.replace('/oauth/error');
+          window.location.replace(getOAuthErrorUrl(incomingError ?? 'session_not_found'));
           return;
         }
         const response = await fetch(
@@ -65,12 +66,12 @@ export function OAuthCallbackClient() {
           { method: 'POST', credentials: 'include' },
         );
         if (!response.ok) {
-          window.location.replace('/oauth/error');
+          window.location.replace(getOAuthErrorUrl('one_time_token_failed'));
           return;
         }
         const body = (await response.json()) as { token?: string };
         if (!body.token) {
-          window.location.replace('/oauth/error');
+          window.location.replace(getOAuthErrorUrl('one_time_token_failed'));
           return;
         }
         callback.searchParams.set('token', body.token);
@@ -79,13 +80,17 @@ export function OAuthCallbackClient() {
       }
       const data = await sdk.getSession();
       if (!data) {
-        window.location.replace('/oauth/error');
+        window.location.replace(getOAuthErrorUrl(incomingError ?? 'session_not_found'));
         return;
       }
       window.location.replace(await withOneTimeToken(redirectTo, config.authApiUrl));
     }
 
-    completeSignIn().catch(() => window.location.replace('/oauth/error'));
+    completeSignIn().catch((error: unknown) =>
+      window.location.replace(
+        getOAuthErrorUrl(error instanceof Error && /^[a-z][a-z0-9_]*$/.test(error.message) ? error.message : (incomingError ?? 'unknown_error')),
+      ),
+    );
   }, [flow, redirectTo]);
 
   return <LoadingView message={t('oauthCallback.redirecting')} />;
