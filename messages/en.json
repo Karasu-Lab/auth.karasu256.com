@@ -267,7 +267,8 @@
     "name": "Name",
     "linkedProviders": "Linked accounts",
     "register": "Register",
-    "registering": "Registering"
+    "registering": "Registering",
+    "cancel": "Cancel"
   },
   "emailVerifyComplete": {
     "title": "Email address verified",

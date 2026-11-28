@@ -9,7 +9,7 @@ import { Button, CardContent, CardHeader, Container, Input, Label, Spinner, toas
 import { providerDefinitions } from '@/components/auth/provider-definitions';
 import { useSdk } from '@/lib/auth/client';
 import { getRedirectTo } from '@/lib/redirect';
-import { completeTemporarySignUp, fetchTemporarySignUp, type TemporarySignUp } from '@/lib/temporary-sign-up';
+import { cancelTemporarySignUp, completeTemporarySignUp, fetchTemporarySignUp, type TemporarySignUp } from '@/lib/temporary-sign-up';
 
 type Phase = { kind: 'loading' } | { kind: 'form'; signUp: TemporarySignUp } | { kind: 'done' } | { kind: 'error'; message: string };
 
@@ -24,6 +24,7 @@ function SignUpCompleteContent() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
   const started = useRef(false);
 
   useEffect(() => {
@@ -63,6 +64,20 @@ function SignUpCompleteContent() {
       return;
     }
     setPhase({ kind: 'done' });
+  }
+
+  async function handleCancel() {
+    setCancelling(true);
+    const result = await cancelTemporarySignUp(config.authApiUrl).catch((error: unknown) => ({
+      kind: 'error' as const,
+      message: error instanceof Error ? error.message : String(error),
+    }));
+    if (result.kind === 'error') {
+      toast.error(result.message);
+      setCancelling(false);
+      return;
+    }
+    window.location.href = '/sign-in';
   }
 
   if (phase.kind === 'loading') {
@@ -115,7 +130,7 @@ function SignUpCompleteContent() {
               value={name}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
               required
-              disabled={submitting}
+              disabled={submitting || cancelling}
             />
           </div>
           <div className="space-y-2">
@@ -128,7 +143,7 @@ function SignUpCompleteContent() {
               value={email}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
               required
-              disabled={submitting}
+              disabled={submitting || cancelling}
             />
           </div>
           {signUp.providers.length > 0 && (
@@ -147,8 +162,11 @@ function SignUpCompleteContent() {
               </ul>
             </div>
           )}
-          <Button type="submit" className="w-full" disabled={submitting || !name.trim() || !email.trim()}>
+          <Button type="submit" className="w-full" disabled={submitting || cancelling || !name.trim() || !email.trim()}>
             {submitting ? t('signUpComplete.registering') : t('signUpComplete.register')}
+          </Button>
+          <Button type="button" variant="outline" className="w-full" disabled={submitting || cancelling} onClick={() => void handleCancel()}>
+            {t('signUpComplete.cancel')}
           </Button>
         </form>
       </CardContent>

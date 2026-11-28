@@ -267,7 +267,8 @@
     "name": "名前",
     "linkedProviders": "連携済みアカウント",
     "register": "登録",
-    "registering": "登録中"
+    "registering": "登録中",
+    "cancel": "キャンセル"
   },
   "emailVerifyComplete": {
     "title": "メールアドレスを確認しました",

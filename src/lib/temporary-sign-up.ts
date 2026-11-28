@@ -25,6 +25,8 @@ export interface CompletedUser {
 
 export type CompleteTemporarySignUpResult = { kind: 'completed'; user: CompletedUser } | { kind: 'error'; message: string };
 
+export type CancelTemporarySignUpResult = { kind: 'cancelled' } | { kind: 'error'; message: string };
+
 function errorMessage(payload: unknown, status: number): string {
   if (typeof payload === 'object' && payload !== null) {
     const candidate = payload as { message?: unknown; error_description?: unknown; error?: unknown; code?: unknown };
@@ -61,4 +63,17 @@ export async function completeTemporarySignUp(authApiUrl: string, input: { name:
   const user = (payload as { user?: CompletedUser } | null)?.user;
   if (!user) return { kind: 'error', message: errorMessage(payload, res.status) };
   return { kind: 'completed', user };
+}
+
+export async function cancelTemporarySignUp(authApiUrl: string): Promise<CancelTemporarySignUpResult> {
+  const base = authApiUrl.replace(/\/+$/, '');
+  const res = await fetch(`${base}/api/auth/sign-up/cancel`, {
+    method: 'POST',
+    credentials: 'include',
+  });
+  if (!res.ok) {
+    const payload: unknown = await res.json().catch(() => null);
+    return { kind: 'error', message: errorMessage(payload, res.status) };
+  }
+  return { kind: 'cancelled' };
 }

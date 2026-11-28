@@ -267,7 +267,8 @@
     "name": "姓名",
     "linkedProviders": "已关联的账户",
     "register": "注册",
-    "registering": "注册中"
+    "registering": "注册中",
+    "cancel": "取消"
   },
   "emailVerifyComplete": {
     "title": "邮箱地址已验证",
