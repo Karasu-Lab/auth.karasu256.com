@@ -72,9 +72,16 @@ function SignUpCompleteContent() {
     const result = await resendVerificationEmail(config.authApiUrl).catch((error: unknown) => ({
       kind: 'error' as const,
       message: error instanceof Error ? error.message : String(error),
+      code: null,
     }));
     if (result.kind === 'error') {
-      toast.error(result.message);
+      toast.error(
+        result.code === 'EMAIL_ALREADY_VERIFIED'
+          ? t('signUpComplete.alreadyVerified')
+          : result.code === 'VERIFICATION_EMAIL_RATE_LIMITED'
+            ? t('emailVerifyComplete.rateLimited')
+            : result.message
+      );
       setResending(false);
       return;
     }

@@ -277,7 +277,8 @@
     "cancel": "取消",
     "resend": "重新发送验证邮件",
     "resending": "正在重新发送",
-    "resent": "我们已重新发送验证邮件。"
+    "resent": "我们已重新发送验证邮件。",
+    "alreadyVerified": "您的邮箱地址已验证。"
   },
   "emailVerifyComplete": {
     "title": "邮箱地址已验证",

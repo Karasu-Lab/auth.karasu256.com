@@ -277,7 +277,8 @@
     "cancel": "キャンセル",
     "resend": "確認メールを再送する",
     "resending": "再送中",
-    "resent": "確認メールを再送しました。"
+    "resent": "確認メールを再送しました。",
+    "alreadyVerified": "メールアドレスは既に確認済みです。"
   },
   "emailVerifyComplete": {
     "title": "メールアドレスを確認しました",
