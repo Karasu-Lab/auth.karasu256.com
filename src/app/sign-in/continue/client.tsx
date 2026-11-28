@@ -1,17 +1,37 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { CardContent, CardHeader, Container, LoadingView, UserAvatar } from '@karasu-lab/ui';
+import { Button, CardContent, CardHeader, Container, LoadingView, UserAvatar, toast } from '@karasu-lab/ui';
 import { useSdk } from '@/lib/auth/client';
 import { useUser } from '@/lib/auth/use-user';
 import { resolveSignInContinueMode } from '@/lib/sign-in-continue';
 
 export function SignInContinueClient() {
   const t = useTranslations();
-  const { config } = useSdk();
+  const {
+    sdk: { authClient },
+    config,
+  } = useSdk();
   const { user, isPending } = useUser();
   const mode = resolveSignInContinueMode(config.appEnv);
+  const [signingOut, setSigningOut] = useState(false);
+
+  async function handleSignOut() {
+    setSigningOut(true);
+    try {
+      const { error } = await authClient.signOut();
+      if (error) {
+        toast.error(error.message || (error as { error?: string }).error || error.statusText);
+        setSigningOut(false);
+        return;
+      }
+      window.location.replace('/sign-in');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : String(error));
+      setSigningOut(false);
+    }
+  }
 
   useEffect(() => {
     if (mode === 'production') {
@@ -50,6 +70,9 @@ export function SignInContinueClient() {
             <dd className="min-w-0 truncate">{user.id}</dd>
           </div>
         </dl>
+        <Button variant="outline" className="w-full" disabled={signingOut} onClick={() => void handleSignOut()}>
+          {signingOut ? t('settings.signingOut') : t('settings.signOut')}
+        </Button>
       </CardContent>
     </Container>
   );
