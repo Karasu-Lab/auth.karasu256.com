@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { resolveRedirectTo } from '../src/lib/redirect';
-import { ACCOUNTS_URL } from '../playwright.config';
-import { fillEmailPassword, signInPath, signUp } from './helpers';
+import { AUTH_URL } from '../playwright.config';
+import { fillEmailPassword, sessionEmail, signInPath, signUp } from './helpers';
 
 const trusted = ['https://accounts.karasu256.com', 'https://karasu256.com'];
 const fallback = 'https://accounts.karasu256.com/settings';
@@ -32,13 +32,25 @@ test.describe('resolveRedirectTo', () => {
 });
 
 for (const untrusted of ['https://evil.example/steal', '//evil.example']) {
-  test(`sign-in falls back to accounts settings for ${untrusted}`, async ({ page, request }) => {
+  test(`sign-in does not redirect for ${untrusted}`, async ({ page, request }) => {
     const user = await signUp(request, 'untrusted');
 
     await page.goto(signInPath(untrusted));
     await fillEmailPassword(page, user);
 
-    await page.waitForURL(`${ACCOUNTS_URL}/settings**`);
-    expect(new URL(page.url()).origin).toBe(ACCOUNTS_URL);
+    await expect.poll(() => sessionEmail(page)).toBe(user.email);
+    expect(new URL(page.url()).origin).toBe(AUTH_URL);
+    expect(new URL(page.url()).pathname).toBe('/sign-in');
   });
 }
+
+test('sign-in does not redirect when no destination is given', async ({ page, request }) => {
+  const user = await signUp(request, 'no-next');
+
+  await page.goto('/sign-in');
+  await fillEmailPassword(page, user);
+
+  await expect.poll(() => sessionEmail(page)).toBe(user.email);
+  expect(new URL(page.url()).origin).toBe(AUTH_URL);
+  expect(new URL(page.url()).pathname).toBe('/sign-in');
+});
