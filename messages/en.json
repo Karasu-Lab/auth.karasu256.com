@@ -263,7 +263,8 @@
     "title": "You are signed in",
     "description": "This is a preview build, so instead of moving to the accounts page, the profile you are signed in with is shown here.",
     "name": "Name",
-    "userId": "User ID"
+    "userId": "User ID",
+    "deleteConfirm": "Delete your account? This cannot be undone."
   },
   "signUpComplete": {
     "title": "Account created",
