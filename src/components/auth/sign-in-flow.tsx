@@ -92,7 +92,7 @@ export function SignInFlow({ continueTo, forceLogin, providers, autoStartProvide
         setLookup(result.lookup);
         if (result.lookup.sso) {
           const { data, error } = await authClient.signIn.sso(
-            { email, callbackURL: continueTo ?? undefined },
+            { email, callbackURL: continueTo ?? `${window.location.origin}/sign-in` },
             turnstileToken ? { headers: { 'cf-turnstile-response': turnstileToken } } : undefined,
           );
           turnstileRef.current?.reset();
