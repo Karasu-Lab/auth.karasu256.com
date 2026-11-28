@@ -259,6 +259,12 @@
   "oauthCallback": {
     "redirecting": "Redirecting"
   },
+  "signInContinue": {
+    "title": "You are signed in",
+    "description": "This is a preview build, so instead of moving to the accounts page, the profile you are signed in with is shown here.",
+    "name": "Name",
+    "userId": "User ID"
+  },
   "signUpComplete": {
     "title": "Account created",
     "message": "Your account has been created. We sent a verification email to your address. Please check your inbox and follow the link in it to verify your email address."
