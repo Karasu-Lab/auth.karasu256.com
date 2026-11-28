@@ -27,6 +27,8 @@ export type CompleteTemporarySignUpResult = { kind: 'completed'; user: Completed
 
 export type CancelTemporarySignUpResult = { kind: 'cancelled' } | { kind: 'error'; message: string };
 
+export type ResendVerificationEmailResult = { kind: 'sent' } | { kind: 'error'; message: string; code: string | null };
+
 function errorMessage(payload: unknown, status: number): string {
   if (typeof payload === 'object' && payload !== null) {
     const candidate = payload as { message?: unknown; error_description?: unknown; error?: unknown; code?: unknown };
@@ -63,6 +65,27 @@ export async function completeTemporarySignUp(authApiUrl: string, input: { name:
   const user = (payload as { user?: CompletedUser } | null)?.user;
   if (!user) return { kind: 'error', message: errorMessage(payload, res.status) };
   return { kind: 'completed', user };
+}
+
+function errorCode(payload: unknown): string | null {
+  if (typeof payload === 'object' && payload !== null) {
+    const candidate = (payload as { code?: unknown }).code;
+    if (typeof candidate === 'string' && candidate) return candidate;
+  }
+  return null;
+}
+
+export async function resendVerificationEmail(authApiUrl: string): Promise<ResendVerificationEmailResult> {
+  const base = authApiUrl.replace(/\/+$/, '');
+  const res = await fetch(`${base}/api/email-verification/resend`, {
+    method: 'POST',
+    credentials: 'include',
+  });
+  if (!res.ok) {
+    const payload: unknown = await res.json().catch(() => null);
+    return { kind: 'error', message: errorMessage(payload, res.status), code: errorCode(payload) };
+  }
+  return { kind: 'sent' };
 }
 
 export async function cancelTemporarySignUp(authApiUrl: string): Promise<CancelTemporarySignUpResult> {
