@@ -278,7 +278,8 @@
     "resend": "Resend the verification email",
     "resending": "Resending",
     "resent": "We sent the verification email again.",
-    "alreadyVerified": "Your email address is already verified."
+    "alreadyVerified": "Your email address is already verified.",
+    "signIn": "Go to sign in"
   },
   "emailVerifyComplete": {
     "title": "Email address verified",

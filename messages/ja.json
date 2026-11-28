@@ -278,7 +278,8 @@
     "resend": "確認メールを再送する",
     "resending": "再送中",
     "resent": "確認メールを再送しました。",
-    "alreadyVerified": "メールアドレスは既に確認済みです。"
+    "alreadyVerified": "メールアドレスは既に確認済みです。",
+    "signIn": "サインインに進む"
   },
   "emailVerifyComplete": {
     "title": "メールアドレスを確認しました",

@@ -130,6 +130,9 @@ function SignUpCompleteContent() {
         <CardHeader className="text-lg font-semibold">{t('signUpComplete.title')}</CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">{t('signUpComplete.message')}</p>
+          <Button type="button" className="w-full" onClick={() => { window.location.href = '/sign-in'; }}>
+            {t('signUpComplete.signIn')}
+          </Button>
           <Button type="button" variant="outline" className="w-full" disabled={resending} onClick={() => void handleResend()}>
             {resending ? t('signUpComplete.resending') : t('signUpComplete.resend')}
           </Button>
