@@ -9,7 +9,7 @@ import { Button, CardContent, CardHeader, Container, Input, Label, Spinner, toas
 import { providerDefinitions } from '@/components/auth/provider-definitions';
 import { useSdk } from '@/lib/auth/client';
 import { getRedirectTo } from '@/lib/redirect';
-import { cancelTemporarySignUp, completeTemporarySignUp, fetchTemporarySignUp, type TemporarySignUp } from '@/lib/temporary-sign-up';
+import { cancelTemporarySignUp, completeTemporarySignUp, fetchTemporarySignUp, resendVerificationEmail, type TemporarySignUp } from '@/lib/temporary-sign-up';
 
 type Phase = { kind: 'loading' } | { kind: 'form'; signUp: TemporarySignUp } | { kind: 'done' } | { kind: 'error'; message: string };
 
@@ -25,6 +25,7 @@ function SignUpCompleteContent() {
   const [email, setEmail] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [cancelling, setCancelling] = useState(false);
+  const [resending, setResending] = useState(false);
   const started = useRef(false);
 
   useEffect(() => {
@@ -66,6 +67,21 @@ function SignUpCompleteContent() {
     setPhase({ kind: 'done' });
   }
 
+  async function handleResend() {
+    setResending(true);
+    const result = await resendVerificationEmail(config.authApiUrl).catch((error: unknown) => ({
+      kind: 'error' as const,
+      message: error instanceof Error ? error.message : String(error),
+    }));
+    if (result.kind === 'error') {
+      toast.error(result.message);
+      setResending(false);
+      return;
+    }
+    toast.success(t('signUpComplete.resent'));
+    setResending(false);
+  }
+
   async function handleCancel() {
     setCancelling(true);
     const result = await cancelTemporarySignUp(config.authApiUrl).catch((error: unknown) => ({
@@ -105,8 +121,11 @@ function SignUpCompleteContent() {
     return (
       <Container className="max-w-sm">
         <CardHeader className="text-lg font-semibold">{t('signUpComplete.title')}</CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">{t('signUpComplete.message')}</p>
+          <Button type="button" variant="outline" className="w-full" disabled={resending} onClick={() => void handleResend()}>
+            {resending ? t('signUpComplete.resending') : t('signUpComplete.resend')}
+          </Button>
         </CardContent>
       </Container>
     );

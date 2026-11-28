@@ -274,7 +274,10 @@
     "linkedProviders": "連携済みアカウント",
     "register": "登録",
     "registering": "登録中",
-    "cancel": "キャンセル"
+    "cancel": "キャンセル",
+    "resend": "確認メールを再送する",
+    "resending": "再送中",
+    "resent": "確認メールを再送しました。"
   },
   "emailVerifyComplete": {
     "title": "メールアドレスを確認しました",

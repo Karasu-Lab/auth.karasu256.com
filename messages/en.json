@@ -274,7 +274,10 @@
     "linkedProviders": "Linked accounts",
     "register": "Register",
     "registering": "Registering",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "resend": "Resend the verification email",
+    "resending": "Resending",
+    "resent": "We sent the verification email again."
   },
   "emailVerifyComplete": {
     "title": "Email address verified",

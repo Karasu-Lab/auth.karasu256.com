@@ -274,7 +274,10 @@
     "linkedProviders": "已关联的账户",
     "register": "注册",
     "registering": "注册中",
-    "cancel": "取消"
+    "cancel": "取消",
+    "resend": "重新发送验证邮件",
+    "resending": "正在重新发送",
+    "resent": "我们已重新发送验证邮件。"
   },
   "emailVerifyComplete": {
     "title": "邮箱地址已验证",
