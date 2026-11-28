@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { completeNativeOAuthLink, getOAuthErrorUrl, isNativeOAuthCallback, resolveRedirectTo } from '../src/lib/redirect';
+import { completeNativeOAuthLink, getContinueTo, getOAuthErrorUrl, getRedirectTo, isNativeOAuthCallback, resolveRedirectTo } from '../src/lib/redirect';
 
 describe('native OAuth callback redirects', () => {
   it('accepts the app callback URI for a provider', () => {
@@ -30,6 +30,32 @@ describe('native OAuth callback redirects', () => {
     expect(getOAuthErrorUrl(null)).toBe('/oauth/error');
     expect(getOAuthErrorUrl(undefined)).toBe('/oauth/error');
     expect(getOAuthErrorUrl('')).toBe('/oauth/error');
+  });
+
+  it('does not redirect anywhere when no destination is given', () => {
+    const config = { trustedOrigins: ['https://accounts.karasu256.com', 'https://*.dev-accounts.karasu256.com'], appEnv: 'production' };
+
+    expect(getRedirectTo(null, config)).toBeNull();
+    expect(getRedirectTo(undefined, config)).toBeNull();
+    expect(getRedirectTo('', config)).toBeNull();
+    expect(getContinueTo(new URLSearchParams(), { ...config, authApiUrl: 'https://api-auth.karasu256.com' })).toBeNull();
+  });
+
+  it('does not fall back to the accounts settings for an untrusted destination', () => {
+    const config = { trustedOrigins: ['https://accounts.karasu256.com'], appEnv: 'production' };
+
+    expect(getRedirectTo('https://evil.example/steal', config)).toBeNull();
+    expect(getRedirectTo('https://dev.accounts.karasu256.com/settings', config)).toBeNull();
+    expect(getRedirectTo('not a url', config)).toBeNull();
+  });
+
+  it('keeps a destination given as a parameter, including a branch deployment', () => {
+    const config = { trustedOrigins: ['https://accounts.karasu256.com', 'https://*.dev-accounts.karasu256.com'], appEnv: 'production' };
+    const branch = 'https://fix-pin-opennext-cloudflare-1-20-17.dev-accounts.karasu256.com/settings';
+
+    expect(getRedirectTo(branch, config)).toBe(branch);
+    expect(getRedirectTo('/oauth/consent?x=1', config)).toBe('/oauth/consent?x=1');
+    expect(getContinueTo(new URLSearchParams({ next: branch }), { ...config, authApiUrl: 'https://api-auth.karasu256.com' })).toBe(branch);
   });
 
   it('returns linked provider callbacks without generating a sign-in token', () => {

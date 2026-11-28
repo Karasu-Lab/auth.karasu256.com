@@ -59,18 +59,15 @@ export function resolveRedirectTo(raw: string | null | undefined, trustedOrigins
   return url.toString();
 }
 
-type RedirectConfig = Pick<ClientConfig, 'accountsUrl' | 'trustedOrigins' | 'appEnv'>;
+type RedirectConfig = Pick<ClientConfig, 'trustedOrigins' | 'appEnv'>;
 
 export function getTrustedOrigins(config: Pick<ClientConfig, 'trustedOrigins' | 'appEnv'>): readonly string[] | null {
   return config.appEnv === 'preview' ? null : config.trustedOrigins;
 }
 
-export function getDefaultRedirectTo(config: RedirectConfig): string {
-  return `${config.accountsUrl}/settings`;
-}
-
-export function getRedirectTo(raw: string | null | undefined, config: RedirectConfig): string {
-  return resolveRedirectTo(raw, getTrustedOrigins(config), getDefaultRedirectTo(config));
+export function getRedirectTo(raw: string | null | undefined, config: RedirectConfig): string | null {
+  if (!raw) return null;
+  return resolveRedirectTo(raw, getTrustedOrigins(config), '') || null;
 }
 
 export function getOAuthErrorUrl(error?: string | null): string {
@@ -79,7 +76,7 @@ export function getOAuthErrorUrl(error?: string | null): string {
 
 const OAUTH_SIGNATURE_PARAMS = ['sig', 'exp', 'prompt'];
 
-export function getContinueTo(searchParams: URLSearchParams, config: Pick<ClientConfig, 'authApiUrl'> & RedirectConfig): string {
+export function getContinueTo(searchParams: URLSearchParams, config: Pick<ClientConfig, 'authApiUrl'> & RedirectConfig): string | null {
   if (searchParams.get('sig') && searchParams.get('client_id')) {
     const params = new URLSearchParams();
     for (const [key, value] of searchParams.entries()) {

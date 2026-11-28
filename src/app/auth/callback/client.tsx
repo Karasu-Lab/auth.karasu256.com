@@ -30,7 +30,7 @@ export function OAuthCallbackClient() {
 
   useEffect(() => {
     async function completeSignIn() {
-      if (isNativeOAuthCallback(redirectTo)) {
+      if (redirectTo && isNativeOAuthCallback(redirectTo)) {
         const callback = new URL(redirectTo);
         const state = callback.searchParams.get('state');
         if (!state || !/^[A-Za-z0-9_-]{16,128}$/.test(state)) {
@@ -67,6 +67,10 @@ export function OAuthCallbackClient() {
       const data = await sdk.getSession();
       if (!data) {
         window.location.replace(getOAuthErrorUrl(incomingError ?? 'session_not_found'));
+        return;
+      }
+      if (!redirectTo) {
+        window.location.replace('/sign-in');
         return;
       }
       window.location.replace(await withOneTimeToken(redirectTo, config.authApiUrl));

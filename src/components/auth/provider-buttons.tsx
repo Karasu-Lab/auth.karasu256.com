@@ -11,7 +11,7 @@ import { ProviderIcon } from './provider-icon';
 
 export interface ProviderButtonsProps {
   providers: OAuthProvider[];
-  continueTo: string;
+  continueTo: string | null;
   onSignedIn: (redirectUrl?: string) => void;
   autoStartProvider?: string;
   disabled?: boolean;
@@ -29,7 +29,7 @@ export function ProviderButtons({ providers, continueTo, onSignedIn, autoStartPr
     setLoading(provider);
     const { error } = await authClient.signIn.social({
       provider,
-      callbackURL: buildUriWithNext(`${window.location.origin}/auth/callback`, continueTo),
+      callbackURL: continueTo ? buildUriWithNext(`${window.location.origin}/auth/callback`, continueTo) : `${window.location.origin}/auth/callback`,
       errorCallbackURL: `${window.location.origin}/oauth/error`,
     });
     if (error) setLoading(null);

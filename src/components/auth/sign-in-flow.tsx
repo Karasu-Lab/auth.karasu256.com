@@ -14,7 +14,7 @@ import { lookupSignIn, type SignInLookup } from '@/lib/sign-in-lookup';
 import { ProviderButtons } from './provider-buttons';
 
 export interface SignInFlowProps {
-  continueTo: string;
+  continueTo: string | null;
   forceLogin: boolean;
   providers: OAuthProvider[];
   autoStartProvider?: string;
@@ -61,11 +61,12 @@ export function SignInFlow({ continueTo, forceLogin, providers, autoStartProvide
   const resetTurnstilePending = Boolean(turnstileSiteKey) && !resetTurnstileToken;
 
   useEffect(() => {
-    if (user && !forceLogin) window.location.replace(continueTo);
+    if (user && !forceLogin && continueTo) window.location.replace(continueTo);
   }, [user, forceLogin, continueTo]);
 
   function handleSignedIn(redirectUrl?: string) {
-    window.location.replace(redirectUrl ?? continueTo);
+    const target = redirectUrl ?? continueTo;
+    if (target) window.location.replace(target);
   }
 
   async function handleEmailSubmit(e: React.FormEvent) {
@@ -91,7 +92,7 @@ export function SignInFlow({ continueTo, forceLogin, providers, autoStartProvide
         setLookup(result.lookup);
         if (result.lookup.sso) {
           const { data, error } = await authClient.signIn.sso(
-            { email, callbackURL: continueTo },
+            { email, callbackURL: continueTo ?? `${window.location.origin}/sign-in` },
             turnstileToken ? { headers: { 'cf-turnstile-response': turnstileToken } } : undefined,
           );
           turnstileRef.current?.reset();
@@ -139,7 +140,7 @@ export function SignInFlow({ continueTo, forceLogin, providers, autoStartProvide
     setBusy(true);
     setPasswordError(null);
     const { data, error } = await authClient.signIn.email(
-      { email, password, callbackURL: continueTo },
+      { email, password, callbackURL: continueTo ?? undefined },
       turnstileToken ? { headers: { 'cf-turnstile-response': turnstileToken } } : undefined,
     );
     if (error) {
@@ -268,7 +269,7 @@ export function SignInFlow({ continueTo, forceLogin, providers, autoStartProvide
                   </div>
                 )}
                 <div className="mt-6 flex items-center justify-between pr-1 pb-1">
-                  <Link href={`/sign-up?next=${encodeURIComponent(continueTo)}`} className="flex items-center gap-1.5 text-sm font-medium text-primary hover:underline">
+                  <Link href={continueTo ? `/sign-up?next=${encodeURIComponent(continueTo)}` : '/sign-up'} className="flex items-center gap-1.5 text-sm font-medium text-primary hover:underline">
                     <UserPlus className="h-4 w-4" />
                     {t('signIn.createAccount')}
                   </Link>
