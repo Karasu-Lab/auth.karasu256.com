@@ -267,7 +267,14 @@
   },
   "signUpComplete": {
     "title": "Account created",
-    "message": "Your account has been created. We sent a verification email to your address. Please check your inbox and follow the link in it to verify your email address."
+    "message": "Your account has been created. We sent a verification email to your address. Please check your inbox and follow the link in it to verify your email address.",
+    "formTitle": "Complete your registration",
+    "formDescription": "Check your name and email address, then press Register to finish creating your account.",
+    "name": "Name",
+    "linkedProviders": "Linked accounts",
+    "register": "Register",
+    "registering": "Registering",
+    "cancel": "Cancel"
   },
   "emailVerifyComplete": {
     "title": "Email address verified",

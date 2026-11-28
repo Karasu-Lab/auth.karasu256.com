@@ -10,11 +10,6 @@ import { useSdk } from '@/lib/auth/client';
 import { Button, Checkbox, Input, Label, PasswordInput, Turnstile, type TurnstileHandle } from '@karasu-lab/ui';
 import { LocalizedPasswordStrengthIndicator } from './localized-password-strength-indicator';
 
-/**
- * Account creation form: email and password with a strength indicator and
- * a terms agreement, against better-auth. On success it shows the account
- * created page, which asks the user to check their email.
- */
 export function SignUpForm({ next }: { next: string | null }) {
   const t = useTranslations();
   const router = useRouter();
@@ -27,8 +22,6 @@ export function SignUpForm({ next }: { next: string | null }) {
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Bot verification: while a site key is configured, registration
-  // waits for the widget's single-use token and carries it along.
   const turnstileSiteKey = config.turnstileSiteKey;
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const turnstileRef = useRef<TurnstileHandle>(null);
@@ -44,7 +37,7 @@ export function SignUpForm({ next }: { next: string | null }) {
       {
         headers: turnstileToken ? { 'cf-turnstile-response': turnstileToken } : undefined,
         onSuccess: () => {
-          router.push('/sign-up/complete');
+          router.push(next ? `/sign-up/complete?next=${encodeURIComponent(next)}` : '/sign-up/complete');
         },
         onError: (ctx) => {
           turnstileRef.current?.reset();
