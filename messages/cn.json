@@ -263,7 +263,8 @@
     "title": "已登录",
     "description": "这是预览构建，因此不会跳转到账户页面，而是在此显示您当前登录的个人资料。",
     "name": "名称",
-    "userId": "用户 ID"
+    "userId": "用户 ID",
+    "deleteConfirm": "要删除账户吗？此操作无法撤销。"
   },
   "signUpComplete": {
     "title": "账户已创建",

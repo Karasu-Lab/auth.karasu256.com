@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Button, CardContent, CardHeader, Container, LoadingView, UserAvatar, toast } from '@karasu-lab/ui';
+import { Button, CardContent, CardHeader, ConfirmDialog, Container, LoadingView, UserAvatar, toast } from '@karasu-lab/ui';
 import { useSdk } from '@/lib/auth/client';
 import { useUser } from '@/lib/auth/use-user';
 import { resolveSignInContinueMode } from '@/lib/sign-in-continue';
@@ -16,6 +16,8 @@ export function SignInContinueClient() {
   const { user, isPending } = useUser();
   const mode = resolveSignInContinueMode(config.appEnv);
   const [signingOut, setSigningOut] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   async function handleSignOut() {
     setSigningOut(true);
@@ -30,6 +32,22 @@ export function SignInContinueClient() {
     } catch (error) {
       toast.error(error instanceof Error ? error.message : String(error));
       setSigningOut(false);
+    }
+  }
+
+  async function handleDeleteAccount() {
+    setDeleting(true);
+    try {
+      const { error } = await authClient.deleteUser({});
+      if (error) {
+        toast.error(error.code === 'SESSION_EXPIRED' ? t('dangerZone.reauthRequired') : error.message || (error as { error?: string }).error || error.statusText);
+        setDeleting(false);
+        return;
+      }
+      window.location.replace('/sign-in');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : String(error));
+      setDeleting(false);
     }
   }
 
@@ -70,9 +88,21 @@ export function SignInContinueClient() {
             <dd className="min-w-0 truncate">{user.id}</dd>
           </div>
         </dl>
-        <Button variant="outline" className="w-full" disabled={signingOut} onClick={() => void handleSignOut()}>
+        <Button variant="outline" className="w-full" disabled={signingOut || deleting} onClick={() => void handleSignOut()}>
           {signingOut ? t('settings.signingOut') : t('settings.signOut')}
         </Button>
+        <Button variant="destructive" className="w-full" disabled={signingOut || deleting} onClick={() => setDeleteDialogOpen(true)}>
+          {deleting ? t('dangerZone.deleting') : t('dangerZone.deleteAccount')}
+        </Button>
+        <ConfirmDialog
+          open={deleteDialogOpen}
+          onOpenChange={setDeleteDialogOpen}
+          title={t('dangerZone.deleteAccount')}
+          description={t('signInContinue.deleteConfirm')}
+          confirmLabel={t('dangerZone.delete')}
+          cancelLabel={t('dangerZone.cancel')}
+          onConfirm={() => void handleDeleteAccount()}
+        />
       </CardContent>
     </Container>
   );
