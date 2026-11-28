@@ -1,0 +1,56 @@
+'use client';
+
+import { useEffect } from 'react';
+import { useTranslations } from 'next-intl';
+import { CardContent, CardHeader, Container, LoadingView, UserAvatar } from '@karasu-lab/ui';
+import { useSdk } from '@/lib/auth/client';
+import { useUser } from '@/lib/auth/use-user';
+import { resolveSignInContinueMode } from '@/lib/sign-in-continue';
+
+export function SignInContinueClient() {
+  const t = useTranslations();
+  const { config } = useSdk();
+  const { user, isPending } = useUser();
+  const mode = resolveSignInContinueMode(config.appEnv);
+
+  useEffect(() => {
+    if (mode === 'production') {
+      window.location.replace(config.accountsUrl);
+      return;
+    }
+    if (!isPending && !user) window.location.replace('/sign-in');
+  }, [mode, config.accountsUrl, isPending, user]);
+
+  if (mode === 'production') return <LoadingView message={t('oauthCallback.redirecting')} />;
+  if (isPending || !user) return <LoadingView message={t('oauthCallback.redirecting')} />;
+
+  return (
+    <Container className="max-w-sm">
+      <CardHeader className="text-lg font-semibold">{t('signInContinue.title')}</CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex items-center gap-3">
+          <UserAvatar uid={user.id} iconUrl={user.image} size={48} />
+          <div className="min-w-0">
+            <p className="truncate font-medium">{user.name ?? user.email}</p>
+            <p className="truncate text-sm text-muted-foreground">{user.email}</p>
+          </div>
+        </div>
+        <p className="text-sm text-muted-foreground">{t('signInContinue.description')}</p>
+        <dl className="space-y-2 text-sm">
+          <div className="flex gap-2">
+            <dt className="shrink-0 text-muted-foreground">{t('signInContinue.name')}</dt>
+            <dd className="min-w-0 truncate">{user.name ?? ''}</dd>
+          </div>
+          <div className="flex gap-2">
+            <dt className="shrink-0 text-muted-foreground">{t('signIn.email')}</dt>
+            <dd className="min-w-0 truncate">{user.email}</dd>
+          </div>
+          <div className="flex gap-2">
+            <dt className="shrink-0 text-muted-foreground">{t('signInContinue.userId')}</dt>
+            <dd className="min-w-0 truncate">{user.id}</dd>
+          </div>
+        </dl>
+      </CardContent>
+    </Container>
+  );
+}

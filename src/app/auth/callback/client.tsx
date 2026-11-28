@@ -7,6 +7,7 @@ import { LoadingView } from '@karasu-lab/ui';
 import { useSdk } from '@/lib/auth/client';
 import { generateOneTimeToken } from '@/lib/one-time-token';
 import { completeNativeOAuthLink, getOAuthErrorUrl, getRedirectTo, isNativeOAuthCallback } from '@/lib/redirect';
+import { SIGN_IN_CONTINUE_PATH } from '@/lib/sign-in-continue';
 
 const APP_CALLBACK_PATH = '/auth/app/callback';
 
@@ -70,7 +71,7 @@ export function OAuthCallbackClient() {
         return;
       }
       if (!redirectTo) {
-        window.location.replace('/sign-in');
+        window.location.replace(SIGN_IN_CONTINUE_PATH);
         return;
       }
       window.location.replace(await withOneTimeToken(redirectTo, config.authApiUrl));

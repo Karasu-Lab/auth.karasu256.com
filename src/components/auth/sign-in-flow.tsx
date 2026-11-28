@@ -11,6 +11,7 @@ import { isDeviceSessionConflict } from '@/lib/device-session-conflict';
 import { startEmailChallenge, verifyEmailChallengeOtp } from '@/lib/email-challenge';
 import type { OAuthProvider } from '@/lib/oauth-providers';
 import { lookupSignIn, type SignInLookup } from '@/lib/sign-in-lookup';
+import { SIGN_IN_CONTINUE_PATH } from '@/lib/sign-in-continue';
 import { ProviderButtons } from './provider-buttons';
 
 export interface SignInFlowProps {
@@ -61,12 +62,11 @@ export function SignInFlow({ continueTo, forceLogin, providers, autoStartProvide
   const resetTurnstilePending = Boolean(turnstileSiteKey) && !resetTurnstileToken;
 
   useEffect(() => {
-    if (user && !forceLogin && continueTo) window.location.replace(continueTo);
+    if (user && !forceLogin) window.location.replace(continueTo ?? SIGN_IN_CONTINUE_PATH);
   }, [user, forceLogin, continueTo]);
 
   function handleSignedIn(redirectUrl?: string) {
-    const target = redirectUrl ?? continueTo;
-    if (target) window.location.replace(target);
+    window.location.replace(redirectUrl ?? continueTo ?? SIGN_IN_CONTINUE_PATH);
   }
 
   async function handleEmailSubmit(e: React.FormEvent) {
@@ -92,7 +92,7 @@ export function SignInFlow({ continueTo, forceLogin, providers, autoStartProvide
         setLookup(result.lookup);
         if (result.lookup.sso) {
           const { data, error } = await authClient.signIn.sso(
-            { email, callbackURL: continueTo ?? `${window.location.origin}/sign-in` },
+            { email, callbackURL: continueTo ?? `${window.location.origin}${SIGN_IN_CONTINUE_PATH}` },
             turnstileToken ? { headers: { 'cf-turnstile-response': turnstileToken } } : undefined,
           );
           turnstileRef.current?.reset();

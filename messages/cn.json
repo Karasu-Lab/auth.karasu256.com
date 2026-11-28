@@ -259,6 +259,12 @@
   "oauthCallback": {
     "redirecting": "重定向中"
   },
+  "signInContinue": {
+    "title": "已登录",
+    "description": "这是预览构建，因此不会跳转到账户页面，而是在此显示您当前登录的个人资料。",
+    "name": "名称",
+    "userId": "用户 ID"
+  },
   "signUpComplete": {
     "title": "账户已创建",
     "message": "您的账户已创建。我们已向您的邮箱发送了验证邮件，请查收邮件并点击其中的链接验证您的邮箱地址。"
