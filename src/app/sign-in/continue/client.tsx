@@ -73,7 +73,6 @@ export function SignInContinueClient() {
             <p className="truncate text-sm text-muted-foreground">{user.email}</p>
           </div>
         </div>
-        <p className="text-sm text-muted-foreground">{t('signInContinue.description')}</p>
         <dl className="space-y-2 text-sm">
           <div className="flex gap-2">
             <dt className="shrink-0 text-muted-foreground">{t('signInContinue.name')}</dt>
